@@ -1,0 +1,12 @@
+*.svg
+
+/.build
+/.build.*
+
+/.vscode/launch.json
+/*.code-workspace
+
+/Package.resolved
+
+/Benchmarks/.build
+/Benchmarks/Package.resolved
