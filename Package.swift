@@ -24,10 +24,10 @@ let package: Package = .init(
             name: "Bijection",
             dependencies: ["BijectionMacro"]
         ),
-        // .testTarget(
-        //     name: "BijectionTests",
-        //     dependencies: ["Bijection"]
-        // ),
+        .testTarget(
+            name: "BijectionTests",
+            dependencies: ["Bijection"]
+        ),
     ]
 )
 
