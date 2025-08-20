@@ -10,7 +10,7 @@ let package: Package = .init(
         .library(name: "Bijection", targets: ["Bijection"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/swiftlang/swift-syntax", from: "600.0.0"),
+        .package(url: "https://github.com/swiftlang/swift-syntax", from: "601.0.0"),
     ],
     targets: [
         .macro(

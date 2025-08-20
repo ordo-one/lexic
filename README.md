@@ -16,10 +16,6 @@ The `@Bijection` library requires Swift 6.1 or later.
 | -------- | ------ |
 | 🐧 Linux | [![Tests](https://github.com/ordo-one/bijection/actions/workflows/Tests.yml/badge.svg)](https://github.com/ordo-one/bijection/actions/workflows/Tests.yml) |
 | 🍏 Darwin | [![Tests](https://github.com/ordo-one/bijection/actions/workflows/Tests.yml/badge.svg)](https://github.com/ordo-one/bijection/actions/workflows/Tests.yml) |
-| 🍏 Darwin (iOS) | [![iOS](https://github.com/ordo-one/bijection/actions/workflows/iOS.yml/badge.svg)](https://github.com/ordo-one/bijection/actions/workflows/iOS.yml) |
-| 🍏 Darwin (tvOS) | [![tvOS](https://github.com/ordo-one/bijection/actions/workflows/tvOS.yml/badge.svg)](https://github.com/ordo-one/bijection/actions/workflows/tvOS.yml) |
-| 🍏 Darwin (visionOS) | [![visionOS](https://github.com/ordo-one/bijection/actions/workflows/visionOS.yml/badge.svg)](https://github.com/ordo-one/bijection/actions/workflows/visionOS.yml) |
-| 🍏 Darwin (watchOS) | [![watchOS](https://github.com/ordo-one/bijection/actions/workflows/watchOS.yml/badge.svg)](https://github.com/ordo-one/bijection/actions/workflows/watchOS.yml) |
 
 
 [Check deployment minimums](https://swiftinit.org/docs/bijection#ss:platform-requirements)
