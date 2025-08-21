@@ -35,6 +35,9 @@ public struct BijectionMacro: PeerMacro {
 
                 context[.error, accessors] = "accessor list contains no getter"
                 return []
+            @unknown default:
+                context[.error, accessors] = "accessor list contains no getter"
+                return []
             }
         }
 
