@@ -1,6 +1,9 @@
 // swift-tools-version:6.1
 import CompilerPluginSupport
 import PackageDescription
+import class Foundation.ProcessInfo
+
+let useSwiftSyntaxXcf: Bool = ProcessInfo.processInfo.environment["ORDO_USE_SWIFT_SYNTAX_XCF"] ?? "true" == "true"
 
 func makeSwiftSyntaxDependency() -> [Package.Dependency] {
     let xcFrameworksRepo: String = "https://github.com/ordo-one/swift-syntax-xcframeworks"
