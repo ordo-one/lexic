@@ -1,7 +1,44 @@
 // swift-tools-version:6.1
 import CompilerPluginSupport
 import PackageDescription
-import typealias Foundation.ProcessInfo
+
+func makeSwiftSyntaxDependency() -> [Package.Dependency] {
+    let xcFrameworksRepo: String = "https://github.com/ordo-one/swift-syntax-xcframeworks"
+    let officialSyntaxRepo: String = "https://github.com/swiftlang/swift-syntax"
+
+    let syntaxUrl: String
+    #if os(iOS)
+        syntaxUrl = xcFrameworksRepo
+    #elseif os(Linux)
+        syntaxUrl = officialSyntaxRepo
+    #else
+        syntaxUrl = useSwiftSyntaxXcf ? xcFrameworksRepo : officialSyntaxRepo
+    #endif
+
+    return [.package(url: syntaxUrl, from: "601.0.1")]
+}
+
+func makeSwiftSyntaxTargetDependencies() -> [Target.Dependency] {
+    let xcFrameworkDependencies: [Target.Dependency] = [
+        .product(name: "SwiftSyntaxWrapper", package: "swift-syntax-xcframeworks")
+    ]
+
+    let standardSyntaxDependencies: [Target.Dependency] = [
+        .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
+        .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
+    ]
+
+    #if os(iOS)
+        return xcFrameworkDependencies
+    #elseif os(Linux)
+        return standardSyntaxDependencies
+    #else
+        if useSwiftSyntaxXcf {
+            return xcFrameworkDependencies
+        }
+        return standardSyntaxDependencies
+    #endif
+}
 
 let package: Package = .init(
     name: "bijection",
@@ -9,16 +46,11 @@ let package: Package = .init(
     products: [
         .library(name: "Bijection", targets: ["Bijection"]),
     ],
-    dependencies: [
-        .package(url: "https://github.com/swiftlang/swift-syntax", from: "601.0.0"),
-    ],
+    dependencies: makeSwiftSyntaxDependency(),
     targets: [
         .macro(
             name: "BijectionMacro",
-            dependencies: [
-                .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
-                .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
-            ]
+            dependencies: makeSwiftSyntaxTargetDependencies(),
         ),
         .target(
             name: "Bijection",
