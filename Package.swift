@@ -18,7 +18,7 @@ func makeSwiftSyntaxDependency() -> [Package.Dependency] {
         syntaxUrl = useSwiftSyntaxXcf ? xcFrameworksRepo : officialSyntaxRepo
     #endif
 
-    return [.package(url: syntaxUrl, from: "601.0.1")]
+    return [.package(url: syntaxUrl, "601.0.1" ..< "603.0.0")]
 }
 
 func makeSwiftSyntaxTargetDependencies() -> [Target.Dependency] {
