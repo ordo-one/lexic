@@ -57,7 +57,7 @@ let package: Package = .init(
         ),
         .target(
             name: "Bijection",
-            dependencies: ["BijectionMacro"]
+            dependencies: ["BijectionMacro"] + makeSwiftSyntaxTargetDependencies()
         ),
         .testTarget(
             name: "BijectionTests",
