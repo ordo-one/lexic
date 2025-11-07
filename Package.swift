@@ -1,47 +1,6 @@
 // swift-tools-version:6.1
 import CompilerPluginSupport
 import PackageDescription
-import class Foundation.ProcessInfo
-
-let useSwiftSyntaxXcf: Bool = ProcessInfo.processInfo.environment["ORDO_USE_SWIFT_SYNTAX_XCF"] ?? "true" == "true"
-
-func makeSwiftSyntaxDependency() -> [Package.Dependency] {
-    let xcFrameworksRepo: String = "https://github.com/ordo-one/swift-syntax-xcframeworks"
-    let officialSyntaxRepo: String = "https://github.com/swiftlang/swift-syntax"
-
-    let syntaxUrl: String
-    #if os(iOS)
-        syntaxUrl = xcFrameworksRepo
-    #elseif os(Linux)
-        syntaxUrl = officialSyntaxRepo
-    #else
-        syntaxUrl = useSwiftSyntaxXcf ? xcFrameworksRepo : officialSyntaxRepo
-    #endif
-
-    return [.package(url: syntaxUrl, "601.0.1" ..< "603.0.0")]
-}
-
-func makeSwiftSyntaxTargetDependencies() -> [Target.Dependency] {
-    let xcFrameworkDependencies: [Target.Dependency] = [
-        .product(name: "SwiftSyntaxWrapper", package: "swift-syntax-xcframeworks")
-    ]
-
-    let standardSyntaxDependencies: [Target.Dependency] = [
-        .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
-        .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
-    ]
-
-    #if os(iOS)
-        return xcFrameworkDependencies
-    #elseif os(Linux)
-        return standardSyntaxDependencies
-    #else
-        if useSwiftSyntaxXcf {
-            return xcFrameworkDependencies
-        }
-        return standardSyntaxDependencies
-    #endif
-}
 
 let package: Package = .init(
     name: "bijection",
@@ -49,11 +8,16 @@ let package: Package = .init(
     products: [
         .library(name: "Bijection", targets: ["Bijection"]),
     ],
-    dependencies: makeSwiftSyntaxDependency(),
+    dependencies: [
+        .package(url: "https://github.com/swiftlang/swift-syntax.git", from: "602.0.0"),
+    ],
     targets: [
         .macro(
             name: "BijectionMacro",
-            dependencies: makeSwiftSyntaxTargetDependencies(),
+            dependencies: [
+                .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
+                .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
+            ]
         ),
         .target(
             name: "Bijection",
