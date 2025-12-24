@@ -10,7 +10,7 @@ public struct BijectionMacro: PeerMacro {
         guard
         let decl: VariableDeclSyntax = decl.as(VariableDeclSyntax.self),
         let binding: PatternBindingSyntax = decl.bindings.first,
-        let type: TypeSyntax = binding.typeAnnotation?.type.trimmed,
+        var type: TypeSyntax = binding.typeAnnotation?.type.trimmed,
         let accessors: AccessorBlockSyntax.Accessors = binding.accessorBlock?.accessors else {
             context[.error, attribute] = """
             '@Bijection' must be applied to a computed property
@@ -86,12 +86,33 @@ public struct BijectionMacro: PeerMacro {
         }
 
         // Parse the `label` argument from the macro attribute.
+        var generic: String? = nil
         var label: String = "_"
         if  let arguments: LabeledExprListSyntax = attribute.arguments?.as(
                 LabeledExprListSyntax.self
             ) {
             for argument: LabeledExprSyntax in arguments {
                 switch argument.label?.text {
+                case "where"?:
+                    if  argument.expression.is(NilLiteralExprSyntax.self) {
+                        generic = nil
+                        continue
+                    }
+
+                    guard
+                    let value: StringLiteralExprSyntax = argument.expression.as(
+                        StringLiteralExprSyntax.self
+                    ),
+                    case .stringSegment(let segment)? = value.segments.first,
+                    case 1 = value.segments.count else {
+                        context[.error, argument] = """
+                        'label' argument must be a string literal
+                        """
+                        return []
+                    }
+
+                    generic = segment.content.text
+
                 case "label"?:
                     guard
                     let value: StringLiteralExprSyntax = argument.expression.as(
@@ -111,6 +132,10 @@ public struct BijectionMacro: PeerMacro {
                     continue
                 }
             }
+        }
+
+        if  let generic: String {
+            type = "some \(raw: generic)"
         }
 
         // Copy the access control from the original declaration.
@@ -140,7 +165,7 @@ public struct BijectionMacro: PeerMacro {
         let initializer: DeclSyntax = """
         \(raw: attributes.map { "\($0) " }.joined())\(decl.modifiers)\
         init?(\(raw: label) $value: borrowing \(type)) {
-            switch $value {
+            switch copy $value {
             \(raw: rows.lazy.map { "case \($1): self = \($0)" }.joined(separator: "\n    "))
             default: return nil
             }
