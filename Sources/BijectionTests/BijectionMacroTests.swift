@@ -5,8 +5,7 @@ import Testing
     enum Enum: CaseIterable, Equatable {
         case a, b, c
 
-        @Bijection
-        var value: Unicode.Scalar {
+        @Bijection(where: "StringProtocol") var description: String {
             switch self {
             case .a: "a"
             case .b: "b"
@@ -14,8 +13,15 @@ import Testing
             }
         }
 
-        @Bijection(label: "index")
-        var index: Int {
+        @Bijection var value: Unicode.Scalar {
+            switch self {
+            case .a: "a"
+            case .b: "b"
+            case .c: "c"
+            }
+        }
+
+        @Bijection(label: "index") var index: Int {
             get {
                 switch self {
                 case .a: 1
@@ -26,6 +32,11 @@ import Testing
         }
     }
 
+    @Test static func RoundtrippingGeneric() {
+        for `case`: Enum in Enum.allCases {
+            #expect(Enum.init(`case`.description[...]) == `case`)
+        }
+    }
     @Test static func Roundtripping() {
         for `case`: Enum in Enum.allCases {
             #expect(Enum.init(`case`.value) == `case`)
