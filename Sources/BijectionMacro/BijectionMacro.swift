@@ -11,8 +11,7 @@ public struct BijectionMacro: PeerMacro {
         let decl: VariableDeclSyntax = decl.as(VariableDeclSyntax.self),
         let binding: PatternBindingSyntax = decl.bindings.first,
         let type: TypeSyntax = binding.typeAnnotation?.type.trimmed,
-        let accessors: AccessorBlockSyntax.Accessors = binding.accessorBlock?.accessors
-        else {
+        let accessors: AccessorBlockSyntax.Accessors = binding.accessorBlock?.accessors else {
             context[.error, attribute] = """
             '@Bijection' must be applied to a computed property
             """
@@ -33,9 +32,6 @@ public struct BijectionMacro: PeerMacro {
                     }
                 }
 
-                context[.error, accessors] = "accessor list contains no getter"
-                return []
-            @unknown default:
                 context[.error, accessors] = "accessor list contains no getter"
                 return []
             }
@@ -91,12 +87,16 @@ public struct BijectionMacro: PeerMacro {
 
         // Parse the `label` argument from the macro attribute.
         var label: String = "_"
-        if  let arguments: LabeledExprListSyntax = attribute.arguments?.as(LabeledExprListSyntax.self) {
+        if  let arguments: LabeledExprListSyntax = attribute.arguments?.as(
+                LabeledExprListSyntax.self
+            ) {
             for argument: LabeledExprSyntax in arguments {
                 switch argument.label?.text {
                 case "label"?:
                     guard
-                    let value: StringLiteralExprSyntax = argument.expression.as(StringLiteralExprSyntax.self),
+                    let value: StringLiteralExprSyntax = argument.expression.as(
+                        StringLiteralExprSyntax.self
+                    ),
                     case .stringSegment(let segment)? = value.segments.first,
                     case 1 = value.segments.count else {
                         context[.error, argument] = """

@@ -5,8 +5,7 @@ import Testing
     enum Enum: CaseIterable, Equatable {
         case a, b, c
 
-        @Bijection
-        var value: Unicode.Scalar {
+        @Bijection var value: Unicode.Scalar {
             switch self {
             case .a: "a"
             case .b: "b"
@@ -14,8 +13,7 @@ import Testing
             }
         }
 
-        @Bijection(label: "index")
-        var index: Int {
+        @Bijection(label: "index") var index: Int {
             get {
                 switch self {
                 case .a: 1
