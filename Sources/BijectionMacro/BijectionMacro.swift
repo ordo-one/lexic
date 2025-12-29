@@ -162,10 +162,15 @@ public struct BijectionMacro: PeerMacro {
 
         /// Note: `borrowing` is inserted, which is meaningful if the value is a ``String`` or
         /// some other allocated type, as `init`s default to `__owned`.
+        ///
+        /// Note: to work around the ancient compiler crash
+        /// https://github.com/swiftlang/swift/issues/86208 , we emit `copy` only if a generic
+        /// constraint is specified. we cannot emit it unconditionally, as it will crash the
+        /// compiler if the type is a tuple type :(
         let initializer: DeclSyntax = """
         \(raw: attributes.map { "\($0) " }.joined())\(decl.modifiers)\
         init?(\(raw: label) $value: borrowing \(type)) {
-            switch copy $value {
+            switch\(raw: generic != nil ? " copy" : "") $value {
             \(raw: rows.lazy.map { "case \($1): self = \($0)" }.joined(separator: "\n    "))
             default: return nil
             }

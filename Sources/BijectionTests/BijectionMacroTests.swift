@@ -30,6 +30,14 @@ import Testing
                 }
             }
         }
+
+        @Bijection(label: "bytes") @inlinable public var bytes: (UInt8, UInt8, UInt8) {
+            switch self {
+            case .a: (1, 2, 3)
+            case .b: (4, 5, 6)
+            case .c: (7, 8, 9)
+            }
+        }
     }
 
     @Test static func RoundtrippingGeneric() {
@@ -40,6 +48,11 @@ import Testing
     @Test static func Roundtripping() {
         for `case`: Enum in Enum.allCases {
             #expect(Enum.init(`case`.value) == `case`)
+        }
+    }
+    @Test static func RoundtrippingTuple() {
+        for `case`: Enum in Enum.allCases {
+            #expect(Enum.init(bytes: `case`.bytes) == `case`)
         }
     }
     @Test static func RoundtrippingWithLabel() {
