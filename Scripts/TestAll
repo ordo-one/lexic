@@ -2,10 +2,14 @@
 set -e
 swift --version
 
+# swift-syntax prebuilt binaries not compatible with `--explicit-target-dependency-import-check`
+
 swift build -c release \
     --explicit-target-dependency-import-check=error \
+    --disable-experimental-prebuilts \
     --build-tests
 
 swift test -c release \
     --skip-build \
-    --explicit-target-dependency-import-check=error
+    --explicit-target-dependency-import-check=error \
+    --disable-experimental-prebuilts
