@@ -1,4 +1,4 @@
-// swift-tools-version:6.1
+// swift-tools-version:6.2
 import CompilerPluginSupport
 import PackageDescription
 
@@ -10,6 +10,7 @@ let package: Package = .init(
     ],
     dependencies: [
         .package(url: "https://github.com/swiftlang/swift-syntax.git", from: "602.0.0"),
+        .package(path: "https://github.com/ordo-one/lexic.git"),
     ],
     targets: [
         .macro(
@@ -17,6 +18,7 @@ let package: Package = .init(
             dependencies: [
                 .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
                 .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
+                .product(name: "Lexic", package: "lexic"),
             ]
         ),
         .target(
@@ -33,6 +35,8 @@ let package: Package = .init(
 for target: Target in package.targets {
     let swift: [SwiftSetting] = [
         .enableUpcomingFeature("ExistentialAny"),
+        .treatWarning("ExistentialAny", as: .error),
+        .treatWarning("MutableGlobalVariable", as: .error),
     ]
 
     {

@@ -1,5 +1,6 @@
 import SwiftSyntax
 import SwiftSyntaxMacros
+import Lexic
 
 public struct BijectionMacro: PeerMacro {
     public static func expansion(
