@@ -1,6 +1,10 @@
 #!/bin/bash
-set -e
+set -euo pipefail
+
 swift --version
+
+swift package dollup --allow-writing-to-package-directory
+git diff --exit-code
 
 # swift-syntax prebuilt binaries not compatible with `--explicit-target-dependency-import-check`
 

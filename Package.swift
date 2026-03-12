@@ -11,6 +11,7 @@ let package: Package = .init(
     dependencies: [
         .package(url: "https://github.com/swiftlang/swift-syntax.git", from: "602.0.0"),
         .package(url: "https://github.com/ordo-one/lexic.git", from: "0.1.0"),
+        .package(url: "https://github.com/ordo-one/dollup.git", from: "1.0.0"),
     ],
     targets: [
         .macro(
