@@ -1,4 +1,4 @@
-*.svg
+.DS_Store
 
 /.build
 /.build.*
@@ -7,6 +7,3 @@
 /*.code-workspace
 
 /Package.resolved
-
-/Benchmarks/.build
-/Benchmarks/Package.resolved

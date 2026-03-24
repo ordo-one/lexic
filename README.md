@@ -1,22 +1,23 @@
-[![Tests](https://github.com/ordo-one/bijection/actions/workflows/Tests.yml/badge.svg)](https://github.com/ordo-one/bijection/actions/workflows/Tests.yml)
-[![Documentation](https://github.com/ordo-one/bijection/actions/workflows/Documentation.yml/badge.svg)](https://github.com/ordo-one/bijection/actions/workflows/Documentation.yml)
+<div align="center">
 
-`@Bijection` is a Swift macro that generates an initializer from a `switch`-`case` mapping of an enum’s cases to set of corresponding values. It is useful for generating roundtripping logic for things like binary encodings and string representations, in situations where relying on native raw value-backed enums is insufficient, experiences poor performance due to lack of inlining, or would interfere with other compiler features, such as [synthesized `Comparable`](https://github.com/swiftlang/swift-evolution/blob/main/proposals/0266-synthesized-comparable-for-enumerations.md).
+🥨 &nbsp; **bijection** &nbsp; 🥨
+
+generate roundtripping logic for `RawRepresentable`, `LosslessStringConvertible`, and more!
 
 [documentation](https://swiftinit.org/docs/bijection) ·
 [license](LICENSE)
 
+</div>
+
 
 ## Requirements
 
+`@Bijection` is a Swift macro that generates an initializer from a `switch`-`case` mapping of an enum’s cases to set of corresponding values. It is useful for generating roundtripping logic for things like binary encodings and string representations, in situations where relying on native raw value-backed enums is insufficient, experiences poor performance due to lack of inlining, or would interfere with other compiler features, such as [synthesized `Comparable`](https://github.com/swiftlang/swift-evolution/blob/main/proposals/0266-synthesized-comparable-for-enumerations.md).
+
 The `@Bijection` library requires Swift 6.1 or later.
 
-
-| Platform | Status |
-| -------- | ------ |
-| 🐧 Linux | [![Tests](https://github.com/ordo-one/bijection/actions/workflows/Tests.yml/badge.svg)](https://github.com/ordo-one/bijection/actions/workflows/Tests.yml) |
-| 🍏 Darwin | [![Tests](https://github.com/ordo-one/bijection/actions/workflows/Tests.yml/badge.svg)](https://github.com/ordo-one/bijection/actions/workflows/Tests.yml) |
-
+<!-- DO NOT EDIT BELOW! AUTOSYNC CONTENT [STATUS TABLE] -->
+<!-- DO NOT EDIT ABOVE! AUTOSYNC CONTENT [STATUS TABLE] -->
 
 [Check deployment minimums](https://swiftinit.org/docs/bijection#ss:platform-requirements)
 
