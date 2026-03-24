@@ -79,6 +79,6 @@ jobs:
         name: ${{ matrix.destination }}
         uses: rarestype/swift-device-action/.github/workflows/build.yml@v1
         with:
-            xcode-scheme: 'swift-topsort'
+            xcode-scheme: 'bijection'
             destination: ${{ matrix.destination }}
             badge-namespace: ${{ github.workflow }}
