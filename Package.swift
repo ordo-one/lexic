@@ -1,5 +1,6 @@
 // swift-tools-version:6.2
 import CompilerPluginSupport
+import Foundation
 import PackageDescription
 
 let package: Package = .init(
@@ -34,13 +35,25 @@ let package: Package = .init(
 )
 
 for target: Target in package.targets {
-    let swift: [SwiftSetting] = [
-        .enableUpcomingFeature("ExistentialAny"),
-        .treatWarning("ExistentialAny", as: .error),
-        .treatWarning("MutableGlobalVariable", as: .error),
-    ]
-
     {
-        $0 = ($0 ?? []) + swift
+        var settings: [SwiftSetting] = $0 ?? []
+
+        settings.append(.enableUpcomingFeature("ExistentialAny"))
+
+        let warningsAsErrors: Bool
+        #if os(macOS)
+        warningsAsErrors = ProcessInfo.processInfo.environment[
+            "BUILD_WARNINGS_AS_ERRORS"
+        ] == "true"
+        #else
+        warningsAsErrors = true
+        #endif
+
+        if  warningsAsErrors {
+            settings.append(.treatWarning("ExistentialAny", as: .error))
+            settings.append(.treatWarning("MutableGlobalVariable", as: .error))
+        }
+
+        $0 = settings
     } (&target.swiftSettings)
 }
