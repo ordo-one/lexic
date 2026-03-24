@@ -17,6 +17,11 @@ generate roundtripping logic for `RawRepresentable`, `LosslessStringConvertible`
 The `@Bijection` library requires Swift 6.1 or later.
 
 <!-- DO NOT EDIT BELOW! AUTOSYNC CONTENT [STATUS TABLE] -->
+| Platform | Status |
+| -------- | ------|
+| 🍏 Darwin (iOS) | [![Status](https://raw.githubusercontent.com/ordo-one/bijection/refs/badges/ci/Tests/iOS/status.svg)](https://github.com/ordo-one/bijection/actions/workflows/Tests.yml) |
+| 🍏 Darwin (tvOS) | [![Status](https://raw.githubusercontent.com/ordo-one/bijection/refs/badges/ci/Tests/tvOS/status.svg)](https://github.com/ordo-one/bijection/actions/workflows/Tests.yml) |
+| 🍏 Darwin (visionOS) | [![Status](https://raw.githubusercontent.com/ordo-one/bijection/refs/badges/ci/Tests/visionOS/status.svg)](https://github.com/ordo-one/bijection/actions/workflows/Tests.yml) |
 <!-- DO NOT EDIT ABOVE! AUTOSYNC CONTENT [STATUS TABLE] -->
 
 [Check deployment minimums](https://swiftinit.org/docs/bijection#ss:platform-requirements)
