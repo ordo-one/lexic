@@ -10,7 +10,7 @@ let package: Package = .init(
     ],
     dependencies: [
         .package(url: "https://github.com/swiftlang/swift-syntax.git", from: "602.0.0"),
-        .package(url: "https://github.com/ordo-one/lexic.git", from: "0.1.0"),
+        // .package(url: "https://github.com/ordo-one/lexic.git", from: "0.1.0"),
         .package(url: "https://github.com/ordo-one/dollup.git", from: "1.0.0"),
     ],
     targets: [
@@ -19,7 +19,7 @@ let package: Package = .init(
             dependencies: [
                 .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
                 .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
-                .product(name: "Lexic", package: "lexic"),
+                // .product(name: "Lexic", package: "lexic"),
             ]
         ),
         .target(
