@@ -4,7 +4,7 @@ import SwiftSyntaxMacros
 
 extension MacroExpansionContext {
     /// A helper syntax for emitting macro expansion diagnostics.
-    public subscript(severity: DiagnosticSeverity, node: some SyntaxProtocol) -> String? {
+    subscript(severity: DiagnosticSeverity, node: some SyntaxProtocol) -> String? {
         get {
             nil
         }

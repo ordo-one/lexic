@@ -37,6 +37,7 @@ for target: Target in package.targets {
         var settings: [SwiftSetting] = $0 ?? []
 
         settings.append(.enableUpcomingFeature("ExistentialAny"))
+        settings.append(.enableUpcomingFeature("InternalImportsByDefault"))
 
         let warningsAsErrors: Bool
         #if os(macOS)
