@@ -78,6 +78,6 @@ jobs:
         name: ${{ matrix.destination }}
         uses: rarestype/swift-device-action/.github/workflows/build.yml@v1
         with:
-            xcode-scheme: 'bijection'
+            xcode-scheme: 'lexic'
             destination: ${{ matrix.destination }}
             badge-namespace: ${{ github.workflow }}
