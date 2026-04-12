@@ -1,10 +1,10 @@
 <div align="center">
 
-🥨 &nbsp; **bijection** &nbsp; 🥨
+🥨 &nbsp; **lexic** &nbsp; 🥨
 
 generate roundtripping logic for `RawRepresentable`, `LosslessStringConvertible`, and more!
 
-[documentation](https://swiftinit.org/docs/bijection) ·
+[documentation](https://swiftinit.org/docs/lexic) ·
 [license](LICENSE)
 
 </div>
@@ -28,7 +28,7 @@ The `@Bijection` library requires Swift 6.1 or later.
 | 🍏 Darwin (watchOS) | [![Status](https://raw.githubusercontent.com/ordo-one/lexic/refs/badges/ci/Tests/watchOS/status.svg)](https://github.com/ordo-one/lexic/actions/workflows/Tests.yml) |
 <!-- DO NOT EDIT ABOVE! AUTOSYNC CONTENT [STATUS TABLE] -->
 
-[Check deployment minimums](https://swiftinit.org/docs/bijection#ss:platform-requirements)
+[Check deployment minimums](https://swiftinit.org/docs/lexic#ss:platform-requirements)
 
 
 ## Examples
