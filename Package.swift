@@ -4,28 +4,26 @@ import Foundation
 import PackageDescription
 
 let package: Package = .init(
-    name: "bijection",
+    name: "lexic",
     platforms: [.macOS(.v15), .iOS(.v18), .tvOS(.v18), .visionOS(.v2), .watchOS(.v11)],
     products: [
         .library(name: "Bijection", targets: ["Bijection"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/swiftlang/swift-syntax.git", from: "602.0.0"),
-        // .package(url: "https://github.com/ordo-one/lexic.git", from: "0.1.0"),
-        .package(url: "https://github.com/ordo-one/dollup.git", from: "1.0.0"),
+        .package(url: "https://github.com/swiftlang/swift-syntax", from: "603.0.0"),
+        .package(url: "https://github.com/ordo-one/dollup", from: "1.0.2"),
     ],
     targets: [
         .macro(
-            name: "BijectionMacro",
+            name: "Lexic",
             dependencies: [
                 .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
                 .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
-                // .product(name: "Lexic", package: "lexic"),
             ]
         ),
         .target(
             name: "Bijection",
-            dependencies: ["BijectionMacro"]
+            dependencies: ["Lexic"]
         ),
         .testTarget(
             name: "BijectionTests",
@@ -39,6 +37,7 @@ for target: Target in package.targets {
         var settings: [SwiftSetting] = $0 ?? []
 
         settings.append(.enableUpcomingFeature("ExistentialAny"))
+        settings.append(.enableUpcomingFeature("InternalImportsByDefault"))
 
         let warningsAsErrors: Bool
         #if os(macOS)

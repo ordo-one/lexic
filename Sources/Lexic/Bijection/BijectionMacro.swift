@@ -1,10 +1,8 @@
 import SwiftSyntax
 import SwiftSyntaxMacros
-// https://forums.swift.org/t/swift-macro-linker-failures-on-linux-and-when-building-with-xcodebuild/84306/2
-// import Lexic
 
-public struct BijectionMacro: PeerMacro {
-    public static func expansion(
+struct BijectionMacro: PeerMacro {
+    static func expansion(
         of attribute: AttributeSyntax,
         providingPeersOf decl: some DeclSyntaxProtocol,
         in context: some MacroExpansionContext
