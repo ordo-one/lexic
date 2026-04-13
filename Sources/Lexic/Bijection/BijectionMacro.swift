@@ -6,7 +6,7 @@ struct BijectionMacro: PeerMacro {
         of attribute: AttributeSyntax,
         providingPeersOf decl: some DeclSyntaxProtocol,
         in context: some MacroExpansionContext
-    ) throws -> [DeclSyntax] {
+    ) -> [DeclSyntax] {
         guard
         let decl: VariableDeclSyntax = decl.as(VariableDeclSyntax.self),
         let binding: PatternBindingSyntax = decl.bindings.first,
@@ -87,56 +87,11 @@ struct BijectionMacro: PeerMacro {
             $0.append((pattern.trimmed, value.trimmed))
         }
 
-        // Parse the `label` argument from the macro attribute.
-        var generic: String? = nil
-        var label: String = "_"
-        if  let arguments: LabeledExprListSyntax = attribute.arguments?.as(
-                LabeledExprListSyntax.self
-            ) {
-            for argument: LabeledExprSyntax in arguments {
-                switch argument.label?.text {
-                case "where"?:
-                    if  argument.expression.is(NilLiteralExprSyntax.self) {
-                        generic = nil
-                        continue
-                    }
-
-                    guard
-                    let value: StringLiteralExprSyntax = argument.expression.as(
-                        StringLiteralExprSyntax.self
-                    ),
-                    case .stringSegment(let segment)? = value.segments.first,
-                    case 1 = value.segments.count else {
-                        context[.error, argument] = """
-                        'label' argument must be a string literal
-                        """
-                        return []
-                    }
-
-                    generic = segment.content.text
-
-                case "label"?:
-                    guard
-                    let value: StringLiteralExprSyntax = argument.expression.as(
-                        StringLiteralExprSyntax.self
-                    ),
-                    case .stringSegment(let segment)? = value.segments.first,
-                    case 1 = value.segments.count else {
-                        context[.error, argument] = """
-                        'label' argument must be a string literal
-                        """
-                        return []
-                    }
-
-                    label = segment.content.text
-
-                default:
-                    continue
-                }
-            }
+        guard let configuration: Configuration = .init(decoding: attribute, in: context) else {
+            return []
         }
 
-        if  let generic: String {
+        if  let generic: String = configuration.where {
             type = "some \(raw: generic)"
         }
 
@@ -171,8 +126,8 @@ struct BijectionMacro: PeerMacro {
         /// compiler if the type is a tuple type :(
         let initializer: DeclSyntax = """
         \(raw: attributes.map { "\($0) " }.joined())\(decl.modifiers)\
-        init?(\(raw: label) $value: borrowing \(type)) {
-            switch\(raw: generic != nil ? " copy" : "") $value {
+        init?(\(raw: configuration.label) $value: borrowing \(type)) {
+            switch\(raw: configuration.where != nil ? " copy" : "") $value {
             \(raw: rows.lazy.map { "case \($1): self = \($0)" }.joined(separator: "\n    "))
             default: return nil
             }
