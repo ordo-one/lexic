@@ -8,6 +8,7 @@ let package: Package = .init(
     platforms: [.macOS(.v15), .iOS(.v18), .tvOS(.v18), .visionOS(.v2), .watchOS(.v11)],
     products: [
         .library(name: "Bijection", targets: ["Bijection"]),
+        .library(name: "Lexic", targets: ["Lexic"]),
     ],
     dependencies: [
         .package(url: "https://github.com/swiftlang/swift-syntax", from: "603.0.0"),
@@ -15,15 +16,21 @@ let package: Package = .init(
     ],
     targets: [
         .macro(
-            name: "Lexic",
+            name: "LexicMacros",
             dependencies: [
                 .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
                 .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
             ]
         ),
         .target(
+            name: "Lexic",
+            dependencies: [
+                .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
+            ]
+        ),
+        .target(
             name: "Bijection",
-            dependencies: ["Lexic"]
+            dependencies: ["LexicMacros"]
         ),
         .testTarget(
             name: "BijectionTests",

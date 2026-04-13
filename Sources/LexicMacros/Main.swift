@@ -1,6 +1,6 @@
 import SwiftCompilerPlugin
 import SwiftSyntaxMacros
-@main struct Lexic: CompilerPlugin {
+@main struct Main: CompilerPlugin {
     let providingMacros: [any Macro.Type] = [
         BijectionMacro.self,
     ]
