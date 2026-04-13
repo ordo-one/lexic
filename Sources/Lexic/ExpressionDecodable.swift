@@ -14,6 +14,7 @@ extension ExpressionDecodable where Self: RawRepresentable, RawValue: Expression
 }
 extension ExpressionDecodable where Self: LosslessStringConvertible & FixedWidthInteger {
     public init(from node: borrowing ExprSyntax) throws(ExpressionDecodingError) {
+        // TODO: handle non-decimal literals
         let text: String
         if  let node: IntegerLiteralExprSyntax = node.as(IntegerLiteralExprSyntax.self),
             case .integerLiteral(let integer) = node.literal.tokenKind {
