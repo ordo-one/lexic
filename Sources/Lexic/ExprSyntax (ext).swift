@@ -28,6 +28,6 @@ extension ExprSyntax {
             expected = "an instance of '\(String.init(reflecting: self))'"
         }
 
-        throw .init(description: "expected \(expected)", node: self)
+        throw .init(text: "expected \(expected)", node: self)
     }
 }

@@ -1,7 +1,7 @@
-import SwiftSyntax
+public import SwiftSyntax
 
 extension ExpressionListDecoder {
-    struct Field<Value> {
+    @frozen public struct Field<Value> {
         let id: CodingKey
         private let owner: TypeSyntax
         private let value: Value
@@ -16,18 +16,18 @@ extension ExpressionListDecoder {
     }
 }
 extension ExpressionListDecoder.Field<ExprSyntax> {
-    func decode<T>(
+    public func decode<T>(
         to _: T.Type = T.self
     ) throws(ExpressionListDecoder.FieldError) -> T where T: ExpressionDecodable {
         do {
-            return try .init(from: try value.expecting(T.Node.self))
+            return try .init(from: try self.value.expecting(T.Node.self))
         } catch let error {
             throw .invalid(self.id, because: error)
         }
     }
 }
 extension ExpressionListDecoder.Field<ExprSyntax?> {
-    func decode<T>(
+    public func decode<T>(
         to _: T.Type = T.self
     ) throws(ExpressionListDecoder.FieldError) -> T where T: ExpressionDecodable {
         guard let value: ExprSyntax = self.value else {

@@ -1,10 +1,13 @@
-import SwiftDiagnostics
-import SwiftSyntax
-import SwiftSyntaxMacros
+public import SwiftDiagnostics
+public import SwiftSyntax
+public import SwiftSyntaxMacros
 
 extension MacroExpansionContext {
     /// A helper syntax for emitting macro expansion diagnostics.
-    subscript(severity: DiagnosticSeverity, node: some SyntaxProtocol) -> String? {
+    @inlinable public subscript(
+        severity: DiagnosticSeverity,
+        node: some SyntaxProtocol
+    ) -> String? {
         get {
             nil
         }

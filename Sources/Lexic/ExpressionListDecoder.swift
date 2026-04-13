@@ -1,12 +1,12 @@
-import SwiftSyntax
+public import SwiftSyntax
 
-struct ExpressionListDecoder<CodingKey>: ~Copyable
+@frozen public struct ExpressionListDecoder<CodingKey>: ~Copyable
     where CodingKey: Hashable & Sendable & RawRepresentable<String> {
     private let owner: TypeSyntax
     private var index: [CodingKey: ArraySlice<ExprSyntax>]
 }
 extension ExpressionListDecoder {
-    init(indexing attribute: borrowing AttributeSyntax) {
+    public init(indexing attribute: borrowing AttributeSyntax) {
         self.init(owner: attribute.attributeName, index: [:])
 
         guard let arguments: LabeledExprListSyntax = attribute.arguments?.as(
@@ -24,7 +24,7 @@ extension ExpressionListDecoder {
     }
 }
 extension ExpressionListDecoder {
-    subscript(key: CodingKey) -> Field<ExprSyntax>? {
+    public subscript(key: CodingKey) -> Field<ExprSyntax>? {
         mutating get {
             guard let expression: ExprSyntax = self.index[key]?.popFirst() else {
                 return nil
@@ -32,7 +32,7 @@ extension ExpressionListDecoder {
             return .init(id: key, owner: self.owner, value: expression)
         }
     }
-    subscript(key: CodingKey) -> Field<ExprSyntax?> {
+    public subscript(key: CodingKey) -> Field<ExprSyntax?> {
         mutating get {
             {
                 // this helps us distinguish the case where the user mistakenly attempted to

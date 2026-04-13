@@ -1,7 +1,7 @@
 import SwiftSyntax
 import SwiftSyntaxMacros
 
-protocol ExpressionListDecodable<CodingKey> {
+public protocol ExpressionListDecodable<CodingKey> {
     associatedtype CodingKey: Hashable & Sendable & RawRepresentable<String>
     init(from list: inout ExpressionListDecoder<CodingKey>) throws
 }

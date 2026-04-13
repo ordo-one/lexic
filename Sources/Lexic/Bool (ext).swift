@@ -1,7 +1,7 @@
-import SwiftSyntax
+public import SwiftSyntax
 
 extension Bool: ExpressionDecodable {
-    init(from node: borrowing BooleanLiteralExprSyntax) {
+    public init(from node: borrowing BooleanLiteralExprSyntax) {
         if  case .keyword(.true) = node.literal.tokenKind {
             self = true
         } else {

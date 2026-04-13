@@ -1,7 +1,7 @@
-import SwiftSyntax
+public import SwiftSyntax
 
 extension ExpressionListDecoder {
-    enum FieldError: Error {
+    @frozen public enum FieldError: Error {
         case consumed(CodingKey, in: TypeSyntax)
         case missing(CodingKey, in: TypeSyntax)
         case invalid(CodingKey, because: ExpressionDecodingError)
@@ -18,7 +18,7 @@ extension ExpressionListDecoder.FieldError: MacroExpansionError {
     }
 }
 extension ExpressionListDecoder.FieldError: CustomStringConvertible {
-    var description: String {
+    public var description: String {
         switch self {
         case .consumed(let id, in: _):
             """

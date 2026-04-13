@@ -2,6 +2,6 @@
     peer,
     names: named(init)
 ) public macro Bijection(label: String = "_", where: String? = nil) = #externalMacro(
-    module: "Lexic",
+    module: "LexicMacros",
     type: "BijectionMacro"
 )
