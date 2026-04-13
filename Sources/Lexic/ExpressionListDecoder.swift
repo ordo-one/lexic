@@ -26,7 +26,7 @@ extension ExpressionListDecoder {
 extension ExpressionListDecoder {
     subscript(key: CodingKey) -> Field<ExprSyntax>? {
         mutating get {
-            guard let expression: ExprSyntax = self.index[key]?.removeFirst() else {
+            guard let expression: ExprSyntax = self.index[key]?.popFirst() else {
                 return nil
             }
             return .init(id: key, owner: self.owner, value: expression)
@@ -40,7 +40,7 @@ extension ExpressionListDecoder {
                 if  case nil = $0 {
                     return .init(id: key, owner: self.owner, value: nil, missing: true)
                 } else {
-                    return .init(id: key, owner: self.owner, value: $0?.removeFirst())
+                    return .init(id: key, owner: self.owner, value: $0?.popFirst())
                 }
             } (&self.index[key])
         }

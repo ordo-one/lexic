@@ -1,7 +1,7 @@
 import SwiftSyntax
 
 extension ExpressionListDecoder {
-    enum FieldError<T>: Error {
+    enum FieldError: Error {
         case consumed(CodingKey, in: TypeSyntax)
         case missing(CodingKey, in: TypeSyntax)
         case invalid(CodingKey, because: ExpressionDecodingError)

@@ -18,7 +18,7 @@ extension ExpressionListDecoder {
 extension ExpressionListDecoder.Field<ExprSyntax> {
     func decode<T>(
         to _: T.Type = T.self
-    ) throws(ExpressionListDecoder.FieldError<ExprSyntax>) -> T where T: ExpressionDecodable {
+    ) throws(ExpressionListDecoder.FieldError) -> T where T: ExpressionDecodable {
         do {
             return try .init(from: try value.expecting(T.Node.self))
         } catch let error {
@@ -29,7 +29,7 @@ extension ExpressionListDecoder.Field<ExprSyntax> {
 extension ExpressionListDecoder.Field<ExprSyntax?> {
     func decode<T>(
         to _: T.Type = T.self
-    ) throws(ExpressionListDecoder.FieldError<ExprSyntax>) -> T where T: ExpressionDecodable {
+    ) throws(ExpressionListDecoder.FieldError) -> T where T: ExpressionDecodable {
         guard let value: ExprSyntax = self.value else {
             throw self.missing
                 ? .missing(self.id, in: self.owner)
