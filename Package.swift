@@ -36,6 +36,12 @@ let package: Package = .init(
             name: "BijectionTests",
             dependencies: ["Bijection"]
         ),
+        .testTarget(
+            name: "LexicTests",
+            dependencies: [
+                .target(name: "Lexic"),
+            ]
+        ),
     ]
 )
 
