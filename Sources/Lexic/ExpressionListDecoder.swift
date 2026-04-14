@@ -29,27 +29,25 @@ extension ExpressionListDecoder {
     public var node: TypeSyntax { self.owner }
 }
 extension ExpressionListDecoder {
-    public subscript(key: CodingKey) -> Field<ExprSyntax>? {
+    public subscript(key: CodingKey) -> ExpressionListDecoderField<ExprSyntax>? {
         mutating get {
             guard let field: LabeledExprSyntax = self.index[key]?.popFirst() else {
                 return nil
             }
             return .init(
-                id: key,
                 label: field.label,
                 value: field.expression,
                 owner: self.owner,
             )
         }
     }
-    public subscript(key: CodingKey) -> Field<ExprSyntax?> {
+    public subscript(key: CodingKey) -> ExpressionListDecoderField<ExprSyntax?> {
         mutating get {
             {
                 // this helps us distinguish the case where the user mistakenly attempted to
                 // decode the same argument twice (or more times)
                 if  case nil = $0 {
                     return .init(
-                        id: key,
                         label: nil,
                         value: nil,
                         owner: self.owner,
@@ -58,7 +56,6 @@ extension ExpressionListDecoder {
                 } else {
                     let field: LabeledExprSyntax? = $0?.popFirst()
                     return .init(
-                        id: key,
                         label: field?.label,
                         value: field?.expression,
                         owner: self.owner,
