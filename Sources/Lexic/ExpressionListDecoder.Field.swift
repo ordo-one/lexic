@@ -3,14 +3,22 @@ public import SwiftSyntax
 extension ExpressionListDecoder {
     @frozen public struct Field<Value> {
         let id: CodingKey
+        public let label: TokenSyntax?
+        public let value: Value
         private let owner: TypeSyntax
-        private let value: Value
         private let missing: Bool
 
-        init(id: CodingKey, owner: TypeSyntax, value: Value, missing: Bool = false) {
+        init(
+            id: CodingKey,
+            label: TokenSyntax?,
+            value: Value,
+            owner: TypeSyntax,
+            missing: Bool = false
+        ) {
             self.id = id
-            self.owner = owner
+            self.label = label
             self.value = value
+            self.owner = owner
             self.missing = missing
         }
     }
