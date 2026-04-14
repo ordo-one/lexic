@@ -1,4 +1,4 @@
-import SwiftSyntax
+public import SwiftSyntax
 import SwiftSyntaxMacros
 
 public protocol ExpressionListDecodable<CodingKey> {
@@ -6,7 +6,7 @@ public protocol ExpressionListDecodable<CodingKey> {
     init(from list: inout ExpressionListDecoder<CodingKey>) throws
 }
 extension ExpressionListDecodable {
-    init(decoding attribute: borrowing AttributeSyntax) throws {
+    public init(decoding attribute: borrowing AttributeSyntax) throws {
         var decoder: ExpressionListDecoder<CodingKey> = .init(indexing: attribute)
         try self.init(from: &decoder)
     }

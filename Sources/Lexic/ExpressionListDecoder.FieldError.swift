@@ -9,7 +9,7 @@ extension ExpressionListDecoder {
 }
 
 extension ExpressionListDecoder.FieldError: MacroExpansionError {
-    var node: Syntax {
+    public var node: Syntax {
         switch self {
         case .consumed(_, in: let node): Syntax.init(node)
         case .missing(_, in: let node): Syntax.init(node)
