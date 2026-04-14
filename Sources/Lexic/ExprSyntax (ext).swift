@@ -9,7 +9,7 @@ extension ExprSyntax {
         }
 
         let expected: String
-        switch self.syntaxNodeType {
+        switch T.self {
         case is NilLiteralExprSyntax.Type:
             expected = "a nil literal"
         case is StringLiteralExprSyntax.Type:
