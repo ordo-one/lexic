@@ -18,7 +18,7 @@ The `@Bijection` library requires Swift 6.1 or later.
 
 <!-- DO NOT EDIT BELOW! AUTOSYNC CONTENT [STATUS TABLE] -->
 | Platform | Status |
-| -------- | ------|
+| -------- | ------ |
 | 💬 Documentation | [![Status](https://raw.githubusercontent.com/ordo-one/lexic/refs/badges/ci/Documentation/_all/status.svg)](https://github.com/ordo-one/lexic/actions/workflows/Documentation.yml) |
 | 🐧 Linux | [![Status](https://raw.githubusercontent.com/ordo-one/lexic/refs/badges/ci/Tests/Linux/status.svg)](https://github.com/ordo-one/lexic/actions/workflows/Tests.yml) |
 | 🍏 Darwin | [![Status](https://raw.githubusercontent.com/ordo-one/lexic/refs/badges/ci/Tests/macOS/status.svg)](https://github.com/ordo-one/lexic/actions/workflows/Tests.yml) |
