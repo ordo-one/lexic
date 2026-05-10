@@ -18,6 +18,8 @@ let package: Package = .init(
         .macro(
             name: "LexicMacros",
             dependencies: [
+                .target(name: "Lexic"),
+
                 .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
                 .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
             ]

@@ -1,5 +1,5 @@
 public import SwiftSyntax
-import SwiftSyntaxMacros
+public import SwiftSyntaxMacros
 
 public protocol ExpressionListDecodable<CodingKey> {
     associatedtype CodingKey: Hashable & Sendable & RawRepresentable<String>
@@ -11,7 +11,7 @@ extension ExpressionListDecodable {
         try self.init(from: &decoder)
     }
 
-    init?(
+    public init?(
         decoding attribute: borrowing AttributeSyntax,
         in context: some MacroExpansionContext
     ) {
