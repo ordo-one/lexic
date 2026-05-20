@@ -7,6 +7,7 @@ let package: Package = .init(
     name: "lexic",
     platforms: [.macOS(.v15), .iOS(.v18), .tvOS(.v18), .visionOS(.v2), .watchOS(.v11)],
     products: [
+        .library(name: "FileContent", targets: ["FileContent"]),
         .library(name: "Bijection", targets: ["Bijection"]),
         .library(name: "Lexic", targets: ["Lexic"]),
     ],
@@ -31,6 +32,9 @@ let package: Package = .init(
         .target(
             name: "Bijection",
             dependencies: ["LexicMacros"]
+        ),
+        .target(
+            name: "FileContent",
         ),
         .testTarget(
             name: "BijectionTests",
