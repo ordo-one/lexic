@@ -23,7 +23,10 @@ extension FileContent {
         get { nil }
         set (lines) {
             if let lines: String {
-                for line: Substring in lines.split(separator: "\n", omittingEmptySubsequences: false) {
+                for line: Substring in lines.split(
+                        separator: "\n",
+                        omittingEmptySubsequences: false
+                    ) {
                     if line.isEmpty {
                         self.utf8.append(0x0A)
                         continue
