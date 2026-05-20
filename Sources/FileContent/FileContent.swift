@@ -1,7 +1,7 @@
 /// Provides a convenient way to write formatted strings with a specific indentation level.
 @frozen public struct FileContent {
-    @usableFromInline var utf8: [UInt8]
-    @inlinable init(utf8: [UInt8]) {
+    public var utf8: [UInt8]
+    @inlinable public init(utf8: [UInt8]) {
         self.utf8 = utf8
     }
 }
