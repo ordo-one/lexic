@@ -9,5 +9,14 @@ git diff --exit-code
 swift build -c release \
     --build-tests
 
+release=$(swift build -c release --show-bin-path)
+
+if ! bash -c '"$1" > /dev/null 2>&1' -- "${release}/AssertTestsOn" > /dev/null 2>&1; then
+    echo "AssertTestsOn passed"
+fi
+if  bash -c '"$1" > /dev/null 2>&1' -- "${release}/AssertTestsOff" > /dev/null 2>&1; then
+    echo "AssertTestsOff passed"
+fi
+
 swift test -c release \
-    --skip-build \
+    --skip-build
