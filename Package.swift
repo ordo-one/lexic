@@ -9,6 +9,7 @@ let package: Package = .init(
     products: [
         .library(name: "FileContent", targets: ["FileContent"]),
         .library(name: "Bijection", targets: ["Bijection"]),
+        .library(name: "Equatable", targets: ["Equatable"]),
         .library(name: "Lexic", targets: ["Lexic"]),
     ],
     dependencies: [
@@ -17,8 +18,19 @@ let package: Package = .init(
     ],
     targets: [
         .macro(
-            name: "LexicMacros",
+            name: "BijectionMacro",
             dependencies: [
+                .target(name: "Lexic"),
+
+                .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
+                .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
+            ]
+        ),
+        .macro(
+            name: "EquatableMacro",
+            dependencies: [
+                .target(name: "Lexic"),
+
                 .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
                 .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
             ]
@@ -31,7 +43,11 @@ let package: Package = .init(
         ),
         .target(
             name: "Bijection",
-            dependencies: ["LexicMacros"]
+            dependencies: ["BijectionMacro"]
+        ),
+        .target(
+            name: "Equatable",
+            dependencies: ["EquatableMacro"]
         ),
         .target(
             name: "FileContent",
