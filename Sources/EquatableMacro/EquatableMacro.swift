@@ -1,5 +1,6 @@
 import SwiftSyntax
 import SwiftSyntaxMacros
+import Lexic
 
 struct EquatableMacro: PeerMacro {
     static func expansion(

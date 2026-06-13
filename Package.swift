@@ -8,6 +8,7 @@ let package: Package = .init(
     platforms: [.macOS(.v15), .iOS(.v18), .tvOS(.v18), .visionOS(.v2), .watchOS(.v11)],
     products: [
         .library(name: "Bijection", targets: ["Bijection"]),
+        .library(name: "Equatable", targets: ["Equatable"]),
         .library(name: "Lexic", targets: ["Lexic"]),
     ],
     dependencies: [
@@ -16,7 +17,16 @@ let package: Package = .init(
     ],
     targets: [
         .macro(
-            name: "LexicMacros",
+            name: "BijectionMacro",
+            dependencies: [
+                .target(name: "Lexic"),
+
+                .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
+                .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
+            ]
+        ),
+        .macro(
+            name: "EquatableMacro",
             dependencies: [
                 .target(name: "Lexic"),
 
@@ -32,7 +42,11 @@ let package: Package = .init(
         ),
         .target(
             name: "Bijection",
-            dependencies: ["LexicMacros"]
+            dependencies: ["BijectionMacro"]
+        ),
+        .target(
+            name: "Equatable",
+            dependencies: ["EquatableMacro"]
         ),
         .testTarget(
             name: "BijectionTests",
