@@ -1,6 +1,6 @@
 import Lexic
 
-extension ExpressionDecodableTests {
+extension Expressions {
     struct Attribute: ExpressionListDecodable {
         let x: Enum?
         let y: Int?
