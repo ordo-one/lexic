@@ -1,3 +1,4 @@
+import Lexic
 import SwiftSyntax
 import SwiftSyntaxMacros
 
