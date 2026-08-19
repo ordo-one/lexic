@@ -1,3 +1,5 @@
+import Lexic
+
 extension BijectionMacro {
     struct Configuration {
         let `where`: String?
