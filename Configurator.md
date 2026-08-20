@@ -75,3 +75,14 @@ public init(
     )
 }
 ```
+
+Some edge cases to look out for:
+
+-   `init`s with multiple generic parameters besides the closure’s error type
+-   `init`s that use `rethrows`
+-   `init`s that have other throwing closure arguments, and thus would still throw, even if an
+    empty closure were passed to the final argument. In this situation, the macro is less
+    useful, but should still degrade gracefully.
+
+If the final parameter type is a non-throwing closure, the macro should refuse to generate any
+peer declarations, and instead instruct the user to provide a default argument instead.
