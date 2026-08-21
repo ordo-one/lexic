@@ -34,14 +34,19 @@ extension TypeSyntax {
                 ) {
                 return true
             }
-            if  case .identifier(let identifier) = self.name.tokenKind {
+            switch self.name.tokenKind {
+            case .identifier(let identifier):
                 var identifier: Substring = identifier.drop { $0 == "`" }
                 while case "`"? = identifier.last {
                     identifier.removeLast()
                 }
 
-                return identifier == symbol
-            } else {
+                return symbol == identifier
+
+            case .keyword(.Self):
+                return symbol == "Self"
+
+            default:
                 return false
             }
 
@@ -52,6 +57,11 @@ extension TypeSyntax {
             return self.element.contains(symbol: symbol)
 
         case let self as MemberTypeSyntax:
+            if  case true? = self.genericArgumentClause?.arguments.contains(
+                    where: { $0.contains(symbol: symbol) }
+                ) {
+                return true
+            }
             return self.baseType.contains(symbol: symbol)
 
         case let self as MetatypeTypeSyntax:

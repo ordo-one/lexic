@@ -13,6 +13,11 @@ import Testing
         #expect(type.contains(symbol: "E"))
         #expect(type.contains(symbol: "F") == false)
     }
+    @Test static func NominalWithGenericArguments() {
+        let type: TypeSyntax = "Foo.Bar<E>"
+        #expect(type.contains(symbol: "E"))
+        #expect(type.contains(symbol: "F") == false)
+    }
     @Test static func SugaredArray() {
         let type: TypeSyntax = "[E]"
         #expect(type.contains(symbol: "E"))
@@ -31,6 +36,16 @@ import Testing
     @Test static func Function() {
         let type: TypeSyntax = "() throws(E) -> ()"
         #expect(type.contains(symbol: "E"))
+        #expect(type.contains(symbol: "F") == false)
+    }
+    @Test static func FunctionSelf() {
+        let type: TypeSyntax = "() throws -> Self"
+        #expect(type.contains(symbol: "Self"))
+        #expect(type.contains(symbol: "F") == false)
+    }
+    @Test static func FunctionSelfBackticks() {
+        let type: TypeSyntax = "() throws -> `Self`"
+        #expect(type.contains(symbol: "Self"))
         #expect(type.contains(symbol: "F") == false)
     }
 }
