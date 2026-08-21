@@ -48,4 +48,11 @@ import Testing
         #expect(type.contains(symbol: "Self"))
         #expect(type.contains(symbol: "F") == false)
     }
+
+
+    @Test static func RejectNested() {
+        let type: TypeSyntax = "Foo.E"
+        #expect(type.contains(symbol: "E") == false)
+        #expect(type.contains(symbol: "F") == false)
+    }
 }
