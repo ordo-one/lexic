@@ -19,6 +19,9 @@ extension GenericRequirementSyntax {
 
         case .layoutRequirement(let constraint):
             return constraint.type.contains(symbol: symbol)
+
+        @unknown default:
+            return false
         }
     }
 }
