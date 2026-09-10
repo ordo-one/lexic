@@ -6,6 +6,10 @@ swift --version
 swift package dollup --allow-writing-to-package-directory
 git diff --exit-code
 
+swift build \
+    --build-tests \
+    -Xswiftc -enable-library-evolution
+
 swift build -c release \
     --build-tests
 
