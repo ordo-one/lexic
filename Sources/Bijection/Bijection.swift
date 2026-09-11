@@ -19,16 +19,17 @@
 /// }
 /// ```
 ///
-/// This generates:
+/// This synthesizes the following initializer on `Code`:
 ///
 /// ```swift
-/// extension Code {
-///     init?(_ $value: borrowing Int) {
-///         switch $value {
-///         case 200: self = .ok
-///         case 404: self = .notFound
-///         default: return nil
-///         }
+/// init?(_ $value: borrowing Int) {
+///     switch $value {
+///     case 200:
+///         self = .ok
+///     case 404:
+///         self = .notFound
+///     default:
+///         return nil
 ///     }
 /// }
 /// ```

@@ -18,16 +18,17 @@
 /// }
 /// ```
 ///
-/// This synthesizes:
+/// This synthesizes the following member on `Target`:
 ///
 /// ```swift
-/// extension Target {
-///     var id: String? {
-///         switch self {
-///         case .user(let scope):     Self.id(scope)
-///         case .session(let scope?): Self.id(scope)
-///         default: nil
-///         }
+/// var id: String? {
+///     switch self {
+///     case .user(let scope):
+///         Self.id(scope)
+///     case .session(let scope?):
+///         Self.id(scope)
+///     default:
+///         nil
 ///     }
 /// }
 /// ```

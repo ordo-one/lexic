@@ -12,7 +12,7 @@ generate roundtripping logic for `RawRepresentable`, `LosslessStringConvertible`
 
 ## Requirements
 
-The `lexic` package provides useful, low-level Swift macros for working with enumeration mappings. It requires Swift 6.1 or later.
+The `lexic` package provides low-level Swift macros for working with enum mappings. It requires Swift 6.1 or later.
 
 <!-- DO NOT EDIT BELOW! AUTOSYNC CONTENT [STATUS TABLE] -->
 | Platform | Status |
@@ -152,13 +152,15 @@ The `lexic` package provides three complementary macros to model discriminated u
 
 When an enumeration contains cases with associated values, you often need a parallel representation that strips away the payloads—a **discriminator**. Discriminators are useful for indexing, hashing, serialization, or table-driven lookups where payloads are irrelevant.
 
-The `@Discriminated` macro synthesizes a peer enumeration containing identical case names without payloads, along with a computed `type` property on the host enum:
+The `@Discriminated` macro synthesizes a peer enumeration containing identical case names without payloads, along with a computed `type` property inside the host enum:
 
 ```swift
-@Discriminated(backing: String.self) enum Action {
-    case start
-    case stop
-    case reset(Int?)
+enum Namespace {
+    @Discriminated(backing: String.self) enum Action {
+        case start
+        case stop
+        case reset(Int?)
+    }
 }
 
 /* --- EXPANDS TO --- */
@@ -168,18 +170,22 @@ enum ActionType: String, CaseIterable, Sendable {
     case reset
 }
 
-extension Action {
-    var type: ActionType {
-        switch self {
-        case .start: .start
-        case .stop:  .stop
-        case .reset: .reset
-        }
+// Synthesized inside Action:
+var type: ActionType {
+    switch self {
+    case .start:
+        .start
+    case .stop:
+        .stop
+    case .reset:
+        .reset
     }
 }
 ```
 
 The generated discriminator automatically conforms to `CaseIterable` and `Sendable`. You can customize the name of the peer enum with `discriminant:` or provide a raw backing type with `backing:`.
+
+Because peer macros with arbitrary names cannot introduce symbols at file scope in Swift, `@Discriminated` must be attached to an enumeration declared within an enclosing type or namespace.
 
 
 ### Ambient constructors with @ambient
@@ -190,19 +196,19 @@ The `@ambient` macro restores zero-argument member access by synthesizing static
 
 ```swift
 @ambient enum Task {
-    case quick
     case recurring(interval: Int = 60, tag: String? = nil)
+    case quick
     case custom(deadline: Date)
 }
 
 /* --- EXPANDS TO --- */
-extension Task {
-    static var quick: Self { .quick }
-    static var recurring: Self { .recurring(interval: 60, tag: nil) }
+// Synthesized inside Task:
+static var recurring: Self {
+    .recurring(interval: 60, tag: nil)
 }
 ```
 
-Parameters that define default arguments use those defaults in the synthesized constructor, while optional parameters without defaults receive `nil`. Any case containing non-optional parameters lacking default arguments—such as `.custom(deadline:)`—is automatically skipped.
+Parameters that define default arguments use those defaults in the synthesized constructor, while optional parameters without defaults receive `nil`. Cases without associated values (such as `.quick`) already support zero-argument dot syntax natively in Swift and are skipped. Any case containing non-optional parameters lacking default arguments—such as `.custom(deadline:)`—is also skipped.
 
 
 ### Polymorphic projection with @Projection
@@ -223,14 +229,15 @@ The `@Projection` macro synthesizes a computed property that unwraps single-para
 }
 
 /* --- EXPANDS TO --- */
-extension Target {
-    var id: String? {
-        switch self {
-        case .user(let scope):     Self.id(scope)
-        case .session(let scope?): Self.id(scope)
-        default:
-            nil
-        }
+// Synthesized inside Target:
+var id: String? {
+    switch self {
+    case .user(let scope):
+        Self.id(scope)
+    case .session(let scope?):
+        Self.id(scope)
+    default:
+        nil
     }
 }
 ```
