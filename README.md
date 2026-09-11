@@ -12,9 +12,7 @@ generate roundtripping logic for `RawRepresentable`, `LosslessStringConvertible`
 
 ## Requirements
 
-`@Bijection` is a Swift macro that generates an initializer from a `switch`-`case` mapping of an enum’s cases to set of corresponding values. It is useful for generating roundtripping logic for things like binary encodings and string representations, in situations where relying on native raw value-backed enums is insufficient, experiences poor performance due to lack of inlining, or would interfere with other compiler features, such as [synthesized `Comparable`](https://github.com/swiftlang/swift-evolution/blob/main/proposals/0266-synthesized-comparable-for-enumerations.md).
-
-The `@Bijection` library requires Swift 6.1 or later.
+The `lexic` package provides useful, low-level Swift macros for working with enumeration mappings. It requires Swift 6.1 or later.
 
 <!-- DO NOT EDIT BELOW! AUTOSYNC CONTENT [STATUS TABLE] -->
 | Platform | Status |
@@ -31,7 +29,9 @@ The `@Bijection` library requires Swift 6.1 or later.
 [Check deployment minimums](https://swiftinit.org/docs/lexic#ss:platform-requirements)
 
 
-## Examples
+## Inverting mappings with @Bijection
+
+`@Bijection` is a Swift macro that generates an initializer from a `switch`-`case` mapping of an enum’s cases to a set of corresponding values. It is useful for generating roundtripping logic for binary encodings and string representations, in situations where relying on native raw value-backed enums is insufficient, experiences poor performance due to lack of inlining, or would interfere with other compiler features, such as [synthesized `Comparable`](https://github.com/swiftlang/swift-evolution/blob/main/proposals/0266-synthesized-comparable-for-enumerations.md).
 
 Generate a plain, unlabeled initializer:
 
@@ -39,8 +39,7 @@ Generate a plain, unlabeled initializer:
 enum Enum: CaseIterable, Equatable {
     case a, b, c
 
-    @Bijection
-    var value: Unicode.Scalar {
+    @Bijection var value: Unicode.Scalar {
         switch self {
         case .a: "a"
         case .b: "b"
@@ -70,8 +69,7 @@ Generate an initializer with a custom argument label:
 
 ```swift
 extension Enum {
-    @Bijection(label: "index")
-    var index: Int {
+    @Bijection(label: "index") var index: Int {
         switch self {
         case .a: 1
         case .b: 2
@@ -101,8 +99,7 @@ Generate an initializer from a getter in a property with multiple accessors:
 
 ```swift
 extension Enum: LosslessStringConvertible {
-    @Bijection
-    var description: String {
+    @Bijection var description: String {
         get {
             switch self {
             case .a: "A"
@@ -142,3 +139,100 @@ It will also copy the following attributes, if present:
 1. `@inlinable`
 1. `@inline`
 1. `@usableFromInline`
+
+
+## Discriminated unions
+
+A **discriminated union** is an enumeration whose cases represent distinct, heterogeneous variants—such as states in a state machine, actions in an event bus, or AST nodes in a compiler. When variants carry payloads, standard Swift patterns can quickly become cumbersome: matching variants requires payload pattern matching even when you only care about the case tag, constructing default variants requires explicit parameters, and extracting shared properties across diverse payloads requires repetitive `switch` expressions.
+
+The `lexic` package provides three complementary macros to model discriminated unions concisely.
+
+
+### Discriminator extraction with @Discriminated
+
+When an enumeration contains cases with associated values, you often need a parallel representation that strips away the payloads—a **discriminator**. Discriminators are useful for indexing, hashing, serialization, or table-driven lookups where payloads are irrelevant.
+
+The `@Discriminated` macro synthesizes a peer enumeration containing identical case names without payloads, along with a computed `type` property on the host enum:
+
+```swift
+@Discriminated(backing: String.self) enum Action {
+    case start
+    case stop
+    case reset(Int?)
+}
+
+/* --- EXPANDS TO --- */
+enum ActionType: String, CaseIterable, Sendable {
+    case start
+    case stop
+    case reset
+}
+
+extension Action {
+    var type: ActionType {
+        switch self {
+        case .start: .start
+        case .stop:  .stop
+        case .reset: .reset
+        }
+    }
+}
+```
+
+The generated discriminator automatically conforms to `CaseIterable` and `Sendable`. You can customize the name of the peer enum with `discriminant:` or provide a raw backing type with `backing:`.
+
+
+### Ambient constructors with @ambient
+
+Swift requires call-site arguments when instantiating any case with an associated value, even if every associated value is optional or provides a default argument. This prevents developers from using fluent dot syntax like `.reset` or `.staging`.
+
+The `@ambient` macro restores zero-argument member access by synthesizing static properties for any case whose parameters are completely optional or supply default arguments:
+
+```swift
+@ambient enum Task {
+    case quick
+    case recurring(interval: Int = 60, tag: String? = nil)
+    case custom(deadline: Date)
+}
+
+/* --- EXPANDS TO --- */
+extension Task {
+    static var quick: Self { .quick }
+    static var recurring: Self { .recurring(interval: 60, tag: nil) }
+}
+```
+
+Parameters that define default arguments use those defaults in the synthesized constructor, while optional parameters without defaults receive `nil`. Any case containing non-optional parameters lacking default arguments—such as `.custom(deadline:)`—is automatically skipped.
+
+
+### Polymorphic projection with @Projection
+
+Enumeration variants often carry disparate payload types that nevertheless share common concepts, such as a name, an identifier, or an account reference. Querying such attributes typically requires writing boilerplate `switch` blocks across every case.
+
+The `@Projection` macro synthesizes a computed property that unwraps single-parameter payloads and delegates to a named `static func`:
+
+```swift
+@Projection(through: "id") enum Target {
+    case user(User)
+    case session(Session?)
+    case anonymous
+
+    static func id(_ value: some Identifiable<String>) -> String {
+        value.id
+    }
+}
+
+/* --- EXPANDS TO --- */
+extension Target {
+    var id: String? {
+        switch self {
+        case .user(let scope):     Self.id(scope)
+        case .session(let scope?): Self.id(scope)
+        default:
+            nil
+        }
+    }
+}
+```
+
+If a case payload is optional, `@Projection` unwraps it via optional pattern matching (`let scope?`) so the projection function receives a non-optional argument. By default, `@Projection` also flattens optional return types to prevent double optionals (`String??`).
