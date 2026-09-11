@@ -1,6 +1,6 @@
 import Testing
 
-@Suite struct DiscriminatedTests {
+@Suite struct DiscriminatedMacro {
     @Test static func PureDiscriminator() {
         #expect(Action.start.type == .start)
         #expect(Action.stop.type == .stop)

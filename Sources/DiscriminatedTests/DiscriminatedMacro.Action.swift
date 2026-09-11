@@ -1,6 +1,6 @@
 import Discriminated
 
-extension DiscriminatedTests {
+extension DiscriminatedMacro {
     @Discriminated enum Action: Equatable {
         case start
         case stop
