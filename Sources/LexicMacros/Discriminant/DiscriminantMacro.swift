@@ -15,30 +15,67 @@ extension DiscriminantMacro: MemberMacro {
             return []
         }
 
-        guard let configuration: Configuration = .init(decoding: attribute, in: context) else {
-            return []
-        }
-
         let nestedEnums: [EnumDeclSyntax] = decl.memberBlock.members
             .compactMap { $0.decl.as(EnumDeclSyntax.self) }
 
-        let targetEnum: EnumDeclSyntax
-        if  let of: String = configuration.of {
-            guard let match: EnumDeclSyntax = nestedEnums.first(where: { $0.name.text == of }) else {
-                context[.error, decl] = "‘@Discriminant’ requires a nested enum named ‘\(of)’"
+        let targetEnums: [EnumDeclSyntax] = nestedEnums.filter { nested in
+            nested.attributes.contains { attribute in
+                guard
+                case .attribute(let attribute) = attribute else {
+                    return false
+                }
+                return attribute.attributeName.as(
+                    IdentifierTypeSyntax.self
+                )?.name.text == "Discriminated"
+            }
+        }
+
+        guard !targetEnums.isEmpty else {
+            context[.error, decl] = """
+            ‘@Discriminant’ requires a nested enum annotated with ‘@Discriminated’
+            """
+            return []
+        }
+        guard targetEnums.count == 1, let targetEnum: EnumDeclSyntax = targetEnums.first else {
+            context[.error, decl] = """
+            ‘@Discriminant’ found multiple nested enums annotated with ‘@Discriminated’
+            """
+            return []
+        }
+
+        var discriminatedAttribute: AttributeSyntax?
+        for element: AttributeListSyntax.Element in targetEnum.attributes {
+            guard
+            case .attribute(let attribute) = element,
+            attribute.attributeName.as(
+                IdentifierTypeSyntax.self
+            )?.name.text == "Discriminated" else {
+                continue
+            }
+            discriminatedAttribute = attribute
+            break
+        }
+
+        if  let attribute: AttributeSyntax = discriminatedAttribute,
+            let config: DiscriminatedMacro.Configuration = .init(
+                decoding: attribute,
+                in: context
+            ) {
+            if  let by: TypeSyntax = config.by {
+                let byText: String = by.trimmedDescription
+                if  byText != decl.name.text, !byText.hasSuffix(".\(decl.name.text)") {
+                    context[.error, attribute] = """
+                    ‘@Discriminated’ must specify ‘by: \(decl.name.text).self’
+                    """
+                    return []
+                }
+            } else {
+                context[.error, attribute] = """
+                ‘@Discriminated’ nested inside ‘@Discriminant’ must specify \
+                ‘by: \(decl.name.text).self’
+                """
                 return []
             }
-            targetEnum = match
-        } else {
-            guard !nestedEnums.isEmpty else {
-                context[.error, decl] = "‘@Discriminant’ requires a nested enum"
-                return []
-            }
-            guard nestedEnums.count == 1, let solitary: EnumDeclSyntax = nestedEnums.first else {
-                context[.error, decl] = "‘@Discriminant’ found multiple nested enums; specify the target enum using ‘of:’"
-                return []
-            }
-            targetEnum = solitary
         }
 
         let cases: [DiscriminatedMacro.Case] = DiscriminatedMacro.cases(of: targetEnum)
@@ -66,7 +103,8 @@ extension DiscriminantMacro: MemberMacro {
             "\n    \(typeCases.joined(separator: "\n    "))\n"
         }
         let initializer: DeclSyntax = """
-        \(raw: decl.inlinable)\(decl.modifiersForMember)init(_ value: \(raw: targetEnum.name.text)) {
+        \(raw: decl.inlinable)\(decl.modifiersForMember)\
+        init(_ value: \(raw: targetEnum.name.text)) {
             switch value {\(raw: body)}
         }
         """
@@ -83,13 +121,15 @@ extension DiscriminantMacro: ExtensionMacro {
         conformingTo protocols: [TypeSyntax],
         in context: some MacroExpansionContext
     ) -> [ExtensionDeclSyntax] {
-        guard !protocols.isEmpty else {
+        guard decl.is(EnumDeclSyntax.self), !protocols.isEmpty else {
             return []
         }
         let conformances: String = protocols.map(\.trimmedDescription).joined(separator: ", ")
-        let extensionDecl: ExtensionDeclSyntax = try! .init(
+        guard let extensionDecl: ExtensionDeclSyntax = try? .init(
             "extension \(type.trimmed): \(raw: conformances) {}"
-        )
+        ) else {
+            return []
+        }
         return [extensionDecl]
     }
 }

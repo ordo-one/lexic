@@ -9,10 +9,12 @@ import Testing
         #expect(ActionType.allCases == [.start, .stop, .reset])
     }
 
-    @Test static func ExplicitDiscriminant() {
-        #expect(Custom.first.type == .first)
-        #expect(Custom.second(10).type == .second)
-        #expect(CustomTypeName.allCases == [.first, .second])
+    @Test static func TopLevel() {
+        #expect(TopLevelAction.start.type == .start)
+        #expect(TopLevelAction.stop.type == .stop)
+        #expect(TopLevelAction.reset(89).type == .reset)
+
+        #expect(TopLevelActionType.allCases == [.start, .stop, .reset])
     }
 
     @Test static func BackingTypes() {

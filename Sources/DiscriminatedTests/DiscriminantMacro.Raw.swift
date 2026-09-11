@@ -2,7 +2,7 @@ import Discriminated
 
 extension DiscriminantMacro {
     @Discriminant enum Raw: String, Equatable {
-        enum Union: Equatable {
+        @Discriminated(by: Raw.self) enum Union: Equatable {
             case one(Int)
             case two(String)
         }

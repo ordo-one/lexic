@@ -34,20 +34,38 @@
 /// }
 /// ```
 ///
+/// Because the peer enumeration name is deterministically suffixed with `Type`,
+/// `@Discriminated` can be attached to top-level enumerations declared at file scope.
+///
+/// When an enumeration is nested inside an outer discriminator declared with
+/// `@Discriminant`, specify `by:` to point to the outer discriminator:
+///
+/// ```swift
+/// @Discriminant public enum TooltipType {
+///     @Discriminated(by: TooltipType.self) public enum Union {
+///         case text(String)
+///         case icon(Int)
+///     }
+/// }
+/// ```
+///
+/// In this mode, peer synthesis is suppressed, and `var type: TooltipType` is
+/// synthesized directly on the nested variant enumeration.
+///
 /// - Parameters:
-///   - discriminant: The name of the synthesized peer enumeration. Defaults to the
-///     host enum’s name suffixed with `Type`.
 ///   - backing: An optional raw-value type (such as `Int.self` or `String.self`)
 ///     for the synthesized peer enumeration.
+///   - by: An optional explicit discriminator type to return from the synthesized
+///     `type` property. When specified, peer synthesis is disabled.
 @attached(
     peer,
-    names: arbitrary
+    names: suffixed(Type)
 ) @attached(
     member,
     names: named(type)
 ) public macro Discriminated(
-    discriminant: String? = nil,
-    backing: Any.Type? = nil
+    by: Any.Type? = nil,
+    backing: Any.Type? = nil,
 ) = #externalMacro(
     module: "LexicMacros",
     type: "DiscriminatedMacro"

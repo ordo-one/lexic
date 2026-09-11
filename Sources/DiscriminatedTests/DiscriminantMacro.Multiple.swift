@@ -1,9 +1,9 @@
 import Discriminated
 
 extension DiscriminantMacro {
-    @Discriminant(of: "Target") enum Multiple: Equatable {
+    @Discriminant enum Multiple: Equatable {
         enum Unrelated {}
-        enum Target: Equatable {
+        @Discriminated(by: Multiple.self) enum Target: Equatable {
             case first
             case second(String)
         }

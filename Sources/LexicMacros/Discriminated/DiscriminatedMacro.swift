@@ -34,6 +34,10 @@ extension DiscriminatedMacro: PeerMacro {
             return []
         }
 
+        guard configuration.by == nil else {
+            return []
+        }
+
         let cases: [Case] = Self.cases(of: decl)
         let casesList: MemberBlockItemListSyntax = .init {
             for `case`: Case in cases {
@@ -71,7 +75,7 @@ extension DiscriminatedMacro: PeerMacro {
             ": CaseIterable, Sendable"
         }
 
-        let peerTypeName: String = configuration.discriminant ?? "\(decl.name.text)Type"
+        let peerTypeName: String = "\(decl.name.text)Type"
         let peer: DeclSyntax = """
         \(AttributeListSyntax.init(attributesOnType))\
         \(decl.modifiersForMember)enum \(raw: peerTypeName)\(raw: inheritance) {
@@ -100,7 +104,11 @@ extension DiscriminatedMacro: MemberMacro {
 
         let cases: [Case] = Self.cases(of: decl)
         // Discriminator ‘type’ property
-        let peerTypeName: String = configuration.discriminant ?? "\(decl.name.text)Type"
+        let peerTypeName: String = if let by: TypeSyntax = configuration.by {
+            by.trimmedDescription
+        } else {
+            "\(decl.name.text)Type"
+        }
         let typeCases: [String] = cases.map { "case .\($0.name): .\($0.name)" }
         let typeProperty: DeclSyntax = """
         \(raw: decl.inlinable)\(decl.modifiersForMember)var type: \(raw: peerTypeName) {
