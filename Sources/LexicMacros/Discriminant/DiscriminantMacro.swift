@@ -96,40 +96,6 @@ extension DiscriminantMacro: MemberMacro {
             )
         }
 
-        let typeCases: [String] = cases.map { "case .\($0.name): self = .\($0.name)" }
-        let body: String = if typeCases.isEmpty {
-            ""
-        } else {
-            "\n    \(typeCases.joined(separator: "\n    "))\n"
-        }
-        let initializer: DeclSyntax = """
-        \(raw: decl.inlinable)\(decl.modifiersForMember)\
-        init(_ value: \(raw: targetEnum.name.text)) {
-            switch value {\(raw: body)}
-        }
-        """
-        members.append(initializer)
-
         return members
-    }
-}
-extension DiscriminantMacro: ExtensionMacro {
-    static func expansion(
-        of attribute: AttributeSyntax,
-        attachedTo decl: some DeclGroupSyntax,
-        providingExtensionsOf type: some TypeSyntaxProtocol,
-        conformingTo protocols: [TypeSyntax],
-        in context: some MacroExpansionContext
-    ) -> [ExtensionDeclSyntax] {
-        guard decl.is(EnumDeclSyntax.self), !protocols.isEmpty else {
-            return []
-        }
-        let conformances: String = protocols.map(\.trimmedDescription).joined(separator: ", ")
-        guard let extensionDecl: ExtensionDeclSyntax = try? .init(
-            "extension \(type.trimmed): \(raw: conformances) {}"
-        ) else {
-            return []
-        }
-        return [extensionDecl]
     }
 }

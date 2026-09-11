@@ -216,28 +216,12 @@ public var type: TooltipType {
 case text
 case icon
 case custom
-
-@inlinable public init(_ value: Union) {
-    switch value {
-    case .text:
-        self = .text
-    case .icon:
-        self = .icon
-    case .custom:
-        self = .custom
-    }
-}
-
-// Synthesized extension:
-extension TooltipType: CaseIterable, Sendable {}
 ```
 
-Call sites can obtain the discriminator tag from a variant value using either the `.type` property or standard conversion syntax:
+Call sites can obtain the discriminator tag from a variant value using the `.type` property:
 
 ```swift
-let value: TooltipType.Union = .text("Hello")
-let typeFromProperty: TooltipType = value.type // .text
-let typeFromInit: TooltipType = .init(value)   // .text
+let type: TooltipType = value.type // .text
 ```
 
 The outer `@Discriminant` macro automatically detects the nested enum annotated with `@Discriminated(by:backing:)`. Raw backing types (such as `enum TooltipType: String`) are fully supported by applying the raw type directly to the host enum declaration.

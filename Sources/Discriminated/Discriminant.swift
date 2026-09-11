@@ -15,7 +15,7 @@
 /// }
 /// ```
 ///
-/// This synthesizes the matching cases and conversion initializer on `OrderType`:
+/// This synthesizes the matching cases on `OrderType`:
 ///
 /// ```swift
 /// public enum OrderType {
@@ -30,24 +30,11 @@
 ///     case custom
 ///     case market
 ///     case limit
-///
-///     @inlinable public init(_ value: Union) {
-///         switch value {
-///         case .custom: self = .custom
-///         case .market: self = .market
-///         case .limit: self = .limit
-///         }
-///     }
 /// }
-///
-/// extension OrderType: CaseIterable, Sendable {}
 /// ```
 @attached(
     member,
     names: arbitrary
-) @attached(
-    extension,
-    conformances: CaseIterable, Sendable
 ) public macro Discriminant() = #externalMacro(
     module: "LexicMacros",
     type: "DiscriminantMacro"
