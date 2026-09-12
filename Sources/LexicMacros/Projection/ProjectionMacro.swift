@@ -78,8 +78,7 @@ extension ProjectionMacro: MemberMacro {
         }
 
         let projectionProperty: DeclSyntax = """
-        \(decl.attributes.mirroredAsTypeForMember)\
-        \(raw: decl.inlinable)\(decl.modifiersForMember)var \
+        \(decl.attributesForMember)\(decl.modifiersForMember)var \
         \(raw: configuration.through): \(propertyType) {
             switch self {
             \(raw: projectionCases.joined(separator: "\n    "))

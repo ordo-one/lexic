@@ -64,8 +64,7 @@ extension DiscriminatedMacro: MemberMacro {
         }
         let cases: [String] = decl.cases.map { "case .\($0.name): .\($0.name)" }
         let typeProperty: DeclSyntax = """
-        \(decl.attributes.mirroredAsTypeForMember)\
-        \(raw: decl.inlinable)\(decl.modifiersForMember)var type: \(raw: type) {
+        \(decl.attributesForMember)\(decl.modifiersForMember)var type: \(raw: type) {
             switch self {
             \(raw: cases.joined(separator: "\n    "))
             }

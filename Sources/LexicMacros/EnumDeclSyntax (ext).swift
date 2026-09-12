@@ -2,28 +2,28 @@ import Lexic
 import SwiftSyntax
 
 extension EnumDeclSyntax {
-    var isPublicOrPackage: Bool {
+    var packageOrHigher: Bool {
         self.modifiers.contains {
             $0.name.text == "public" || $0.name.text == "package"
         }
     }
-
-    var isUsableFromInline: Bool {
-        self.attributes.contains {
-            if  case .attribute(let attribute) = $0 {
-                return attribute.baseName == "usableFromInline"
-            } else {
-                return false
+}
+extension EnumDeclSyntax {
+    func attributesForMember(inlinable: Bool) -> AttributeListSyntax {
+        var attributes: AttributeListSyntax = self.attributes.mirroredAsTypeForMember
+        if  inlinable {
+            let qualifies: Bool = self.packageOrHigher || self.attributes.contains {
+                $0 == "usableFromInline"
+            }
+            if  qualifies {
+                attributes.append(.attribute("@inlinable "))
             }
         }
+        return attributes
     }
 
-    var isInlinable: Bool {
-        self.isPublicOrPackage || self.isUsableFromInline
-    }
-
-    var inlinable: String {
-        self.isInlinable ? "@inlinable " : ""
+    var attributesForMember: AttributeListSyntax {
+        self.attributesForMember(inlinable: true)
     }
 
     var modifiersForMember: DeclModifierListSyntax {

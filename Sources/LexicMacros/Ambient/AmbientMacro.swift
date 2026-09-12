@@ -57,8 +57,7 @@ extension AmbientMacro: MemberMacro {
             let argumentsList: String = arguments.joined(separator: ", ")
 
             let accessor: DeclSyntax = """
-            \(decl.attributes.mirroredAsTypeForMember)\
-            \(raw: decl.inlinable)\(decl.modifiersForMember)static var \
+            \(decl.attributesForMember)\(decl.modifiersForMember)static var \
             \(raw: element.name): Self {
                 .\(raw: element.name)(\(raw: argumentsList))
             }
