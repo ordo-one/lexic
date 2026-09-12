@@ -69,16 +69,11 @@ extension DiscriminatedMacro: PeerMacro {
             $0.append($1)
         }
 
-        let inheritance: String = if let backing: TypeSyntax = configuration.backing {
-            ": \(backing), CaseIterable, Sendable"
-        } else {
-            ": CaseIterable, Sendable"
-        }
-
         let peerTypeName: String = "\(decl.name.text)Type"
         let peer: DeclSyntax = """
         \(AttributeListSyntax.init(attributesOnType))\
-        \(decl.modifiersForMember)enum \(raw: peerTypeName)\(raw: inheritance) {
+        \(decl.modifiersForMember)enum \(raw: peerTypeName)\
+        \(raw: configuration.backing.map { ": \($0)" } ?? "") {
         \(casesList)
         }
         """

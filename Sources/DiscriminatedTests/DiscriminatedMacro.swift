@@ -1,35 +1,32 @@
 import Testing
 
 @Suite struct DiscriminatedMacro {
-    @Test static func PureDiscriminator() {
+    @Test static func Nested() {
         #expect(Action.start.type == .start)
         #expect(Action.stop.type == .stop)
         #expect(Action.reset(89).type == .reset)
-
-        #expect(ActionType.allCases == [.start, .stop, .reset])
     }
 
     @Test static func TopLevel() {
         #expect(TopLevelAction.start.type == .start)
         #expect(TopLevelAction.stop.type == .stop)
         #expect(TopLevelAction.reset(89).type == .reset)
-
-        #expect(TopLevelActionType.allCases == [.start, .stop, .reset])
     }
 
-    @Test static func BackingTypes() {
+    @Test static func BackingSubstring() {
+        #expect(BackedBySubstringType.foobie.rawValue == "foobie")
+        #expect(BackedBySubstringType.barbie.rawValue == "barbie")
+    }
+
+    @Test static func BackingString() {
         #expect(BackedByStringType.first.rawValue == "first")
         #expect(BackedByStringType.second.rawValue == "second")
-        #expect(BackedByStringType.allCases == [.first, .second])
+    }
 
-        let alpha: Substring = BackedBySubstringType.alpha.rawValue
-        #expect(alpha == "alpha")
-        let beta: Substring = BackedBySubstringType.beta.rawValue
-        #expect(beta == "beta")
-
-        #expect(BackedByIntType.low.rawValue == 0)
-        #expect(BackedByIntType.medium.rawValue == 1)
-        #expect(BackedByIntType.high.rawValue == 2)
+    @Test static func BackingInt() {
+        #expect(BackedByIntType.a.rawValue == 0)
+        #expect(BackedByIntType.b.rawValue == 1)
+        #expect(BackedByIntType.c.rawValue == 2)
     }
 
     @Test static func RecursiveEnum() {
