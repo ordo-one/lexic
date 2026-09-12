@@ -49,7 +49,7 @@ extension ProjectionMacro: MemberMacro {
         context[.warning, returnType] = returnType.isUnsugaredOptionalDiagnostic
 
         var projectionCases: [String] = []
-        for element: EnumCaseElementSyntax in decl.caseElements {
+        for element: EnumCaseElementSyntax in decl.cases {
             guard
             let list: EnumCaseParameterListSyntax = element.parameterClause?.parameters,
                 list.count == 1,
@@ -78,6 +78,7 @@ extension ProjectionMacro: MemberMacro {
         }
 
         let projectionProperty: DeclSyntax = """
+        \(decl.attributes.mirroredAsTypeForMember)\
         \(raw: decl.inlinable)\(decl.modifiersForMember)var \
         \(raw: configuration.through): \(propertyType) {
             switch self {

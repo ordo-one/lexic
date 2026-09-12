@@ -14,26 +14,26 @@ extension DiscriminatedMacro: PeerMacro {
             return []
         }
 
-        guard let configuration: Configuration = .init(decoding: attribute, in: context) else {
+        guard
+        let configuration: Configuration = .init(decoding: attribute, in: context) else {
+            return []
+        }
+        if  case _? = configuration.by {
             return []
         }
 
-        guard configuration.by == nil else {
-            return []
-        }
-
-        let casesList: MemberBlockItemListSyntax = .init {
-            for element: EnumCaseElementSyntax in decl.caseElements {
+        let cases: MemberBlockItemListSyntax = .init {
+            for element: EnumCaseElementSyntax in decl.cases {
                 EnumCaseDeclSyntax.init(case: element.name)
             }
         }
 
-        let peerTypeName: String = "\(decl.name.text)Type"
+        let type: String = "\(decl.name.text)Type"
         let peer: DeclSyntax = """
-        \(decl.attributesForPeerType)\
-        \(decl.modifiersForMember)enum \(raw: peerTypeName)\
+        \(decl.attributes.mirroredAsTypeForType)\(decl.modifiersForMember)\
+        enum \(raw: type)\
         \(raw: configuration.backing.map { ": \($0)" } ?? "") {
-        \(casesList)
+        \(cases)
         }
         """
 
@@ -57,16 +57,17 @@ extension DiscriminatedMacro: MemberMacro {
         }
 
         // Discriminator ‘type’ property
-        let peerTypeName: String = if let by: TypeSyntax = configuration.by {
+        let type: String = if let by: TypeSyntax = configuration.by {
             by.trimmedDescription
         } else {
             "\(decl.name.text)Type"
         }
-        let typeCases: [String] = decl.caseElements.map { "case .\($0.name): .\($0.name)" }
+        let cases: [String] = decl.cases.map { "case .\($0.name): .\($0.name)" }
         let typeProperty: DeclSyntax = """
-        \(raw: decl.inlinable)\(decl.modifiersForMember)var type: \(raw: peerTypeName) {
+        \(decl.attributes.mirroredAsTypeForMember)\
+        \(raw: decl.inlinable)\(decl.modifiersForMember)var type: \(raw: type) {
             switch self {
-            \(raw: typeCases.joined(separator: "\n    "))
+            \(raw: cases.joined(separator: "\n    "))
             }
         }
         """

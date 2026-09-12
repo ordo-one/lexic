@@ -96,21 +96,6 @@ struct BijectionMacro: PeerMacro {
             type = "some \(raw: generic)"
         }
 
-        // Copy the access control from the original declaration.
-        var attributes: [AttributeSyntax] = []
-        for case .attribute(let node) in decl.attributes {
-            switch node.baseName {
-            case "available": break
-            case "backDeployed": break
-            case "inlinable": break
-            case "inline": break
-            case "usableFromInline": break
-            default: continue
-            }
-
-            attributes.append(node.trimmed)
-        }
-
         /// Note: `borrowing` is inserted, which is meaningful if the value is a ``String`` or
         /// some other allocated type, as `init`s default to `__owned`.
         ///
@@ -119,7 +104,7 @@ struct BijectionMacro: PeerMacro {
         /// constraint is specified. we cannot emit it unconditionally, as it will crash the
         /// compiler if the type is a tuple type :(
         let initializer: DeclSyntax = """
-        \(raw: attributes.map { "\($0) " }.joined())\(decl.modifiers)\
+        \(decl.attributes.mirroredAsMemberForMember)\(decl.modifiers)\
         init?(\(raw: configuration.label) $value: borrowing \(type)) {
             switch\(raw: configuration.where != nil ? " copy" : "") $value {
             \(raw: rows.lazy.map { "case \($1): self = \($0)" }.joined(separator: "\n    "))

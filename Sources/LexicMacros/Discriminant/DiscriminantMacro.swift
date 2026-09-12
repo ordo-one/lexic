@@ -15,12 +15,16 @@ extension DiscriminantMacro: MemberMacro {
             return []
         }
 
-        let candidates: [(enum: EnumDeclSyntax, attribute: AttributeSyntax)] = decl
-            .memberBlock.members
-            .compactMap { $0.decl.as(EnumDeclSyntax.self) }
-            .compactMap { nested in
-                nested.attributes.first(named: "Discriminated").map { (nested, $0) }
+        let candidates: [
+            (enum: EnumDeclSyntax, attribute: AttributeSyntax)
+        ] = decl.memberBlock.members.reduce(into: []) {
+            if  let nested: EnumDeclSyntax = $1.decl.as(EnumDeclSyntax.self),
+                let attribute: AttributeSyntax = nested.attributes.first(
+                    named: "Discriminated"
+                ) {
+                $0.append((nested, attribute))
             }
+        }
 
         guard !candidates.isEmpty else {
             context[.error, decl] = """
@@ -39,32 +43,34 @@ extension DiscriminantMacro: MemberMacro {
                 decoding: candidate.attribute,
                 in: context
             ) {
-            if  let by: TypeSyntax = config.by {
-                let typeName: Substring? = switch by.asProtocol((any TypeSyntaxProtocol).self) {
-                case let identifier as IdentifierTypeSyntax:
-                    identifier.name.unescaped
-                case let member as MemberTypeSyntax:
-                    member.name.unescaped
-                default:
-                    nil
-                }
-                if  typeName != decl.name.unescaped {
-                    context[.error, candidate.attribute] = """
-                    ‘@Discriminated’ must specify ‘by: \(decl.name.text).self’
-                    """
-                    return []
-                }
-            } else {
+            guard let type: TypeSyntax = config.by else {
                 context[.error, candidate.attribute] = """
                 ‘@Discriminated’ nested inside ‘@Discriminant’ must specify \
                 ‘by: \(decl.name.text).self’
                 """
                 return []
             }
+
+            let name: Substring?
+
+            switch type.asProtocol((any TypeSyntaxProtocol).self) {
+            case let identifier as IdentifierTypeSyntax:
+                name = identifier.name.unescaped
+            case let member as MemberTypeSyntax:
+                name = member.name.unescaped
+            default:
+                name = nil
+            }
+            guard case decl.name.unescaped? = name else {
+                context[.error, candidate.attribute] = """
+                ‘@Discriminated’ must specify ‘by: \(decl.name.text).self’
+                """
+                return []
+            }
         }
 
         var members: [DeclSyntax] = []
-        for element: EnumCaseElementSyntax in candidate.enum.caseElements {
+        for element: EnumCaseElementSyntax in candidate.enum.cases {
             members.append(DeclSyntax.init(EnumCaseDeclSyntax.init(case: element.name)))
         }
         return members

@@ -30,24 +30,9 @@ extension EnumDeclSyntax {
         self.modifiers.filter { $0.name.text != "indirect" }
     }
 
-    var caseElements: [EnumCaseElementSyntax] {
+    var cases: [EnumCaseElementSyntax] {
         self.memberBlock.members.flatMap {
             $0.decl.as(EnumCaseDeclSyntax.self)?.elements ?? []
-        }
-    }
-
-    var attributesForPeerType: AttributeListSyntax {
-        self.attributes.filter {
-            guard case .attribute(let attribute) = $0 else {
-                return false
-            }
-            switch attribute.baseName {
-            case "available": return true
-            case "backDeployed": return true
-            case "frozen": return true
-            case "usableFromInline": return true
-            default: return false
-            }
         }
     }
 }

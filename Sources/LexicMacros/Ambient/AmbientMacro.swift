@@ -3,6 +3,7 @@ import SwiftSyntax
 import SwiftSyntaxMacros
 
 struct AmbientMacro {}
+
 extension AmbientMacro: MemberMacro {
     static func expansion(
         of attribute: AttributeSyntax,
@@ -17,7 +18,7 @@ extension AmbientMacro: MemberMacro {
 
         var members: [DeclSyntax] = []
 
-        for element: EnumCaseElementSyntax in decl.caseElements {
+        for element: EnumCaseElementSyntax in decl.cases {
             guard
             let list: EnumCaseParameterListSyntax = element.parameterClause?.parameters,
                !list.isEmpty else {
@@ -56,6 +57,7 @@ extension AmbientMacro: MemberMacro {
             let argumentsList: String = arguments.joined(separator: ", ")
 
             let accessor: DeclSyntax = """
+            \(decl.attributes.mirroredAsTypeForMember)\
             \(raw: decl.inlinable)\(decl.modifiersForMember)static var \
             \(raw: element.name): Self {
                 .\(raw: element.name)(\(raw: argumentsList))
