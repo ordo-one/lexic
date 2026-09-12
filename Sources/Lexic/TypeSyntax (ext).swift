@@ -1,4 +1,5 @@
 public import SwiftSyntax
+import SwiftSyntaxMacros
 
 extension TypeSyntax {
     public func contains(symbol: String) -> Bool {
@@ -89,6 +90,15 @@ extension TypeSyntax {
         default:
             return false
         }
+    }
+
+    public var isUnsugaredOptionalDiagnostic: String? {
+        guard self.isUnsugaredOptional else {
+            return nil
+        }
+        return """
+        spelling ‘\(self.trimmed)’ will not be optimized; use sugared optional ‘?’ instead
+        """
     }
 
     public var isUnsugaredOptional: Bool {

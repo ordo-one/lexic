@@ -15,62 +15,47 @@ extension DiscriminantMacro: MemberMacro {
             return []
         }
 
-        let nestedEnums: [EnumDeclSyntax] = decl.memberBlock.members
+        let candidates: [(enum: EnumDeclSyntax, attribute: AttributeSyntax)] = decl
+            .memberBlock.members
             .compactMap { $0.decl.as(EnumDeclSyntax.self) }
-
-        let targetEnums: [EnumDeclSyntax] = nestedEnums.filter { nested in
-            nested.attributes.contains { attribute in
-                guard
-                case .attribute(let attribute) = attribute else {
-                    return false
-                }
-                return attribute.attributeName.as(
-                    IdentifierTypeSyntax.self
-                )?.name.text == "Discriminated"
+            .compactMap { nested in
+                nested.attributes.first(named: "Discriminated").map { (nested, $0) }
             }
-        }
 
-        guard !targetEnums.isEmpty else {
+        guard !candidates.isEmpty else {
             context[.error, decl] = """
             ‘@Discriminant’ requires a nested enum annotated with ‘@Discriminated’
             """
             return []
         }
-        guard targetEnums.count == 1, let targetEnum: EnumDeclSyntax = targetEnums.first else {
+        guard candidates.count == 1, let candidate = candidates.first else {
             context[.error, decl] = """
             ‘@Discriminant’ found multiple nested enums annotated with ‘@Discriminated’
             """
             return []
         }
 
-        var discriminatedAttribute: AttributeSyntax?
-        for element: AttributeListSyntax.Element in targetEnum.attributes {
-            guard
-            case .attribute(let attribute) = element,
-            attribute.attributeName.as(
-                IdentifierTypeSyntax.self
-            )?.name.text == "Discriminated" else {
-                continue
-            }
-            discriminatedAttribute = attribute
-            break
-        }
-
-        if  let attribute: AttributeSyntax = discriminatedAttribute,
-            let config: DiscriminatedMacro.Configuration = .init(
-                decoding: attribute,
+        if  let config: DiscriminatedMacro.Configuration = .init(
+                decoding: candidate.attribute,
                 in: context
             ) {
             if  let by: TypeSyntax = config.by {
-                let byText: String = by.trimmedDescription
-                if  byText != decl.name.text, !byText.hasSuffix(".\(decl.name.text)") {
-                    context[.error, attribute] = """
+                let typeName: Substring? = switch by.asProtocol((any TypeSyntaxProtocol).self) {
+                case let identifier as IdentifierTypeSyntax:
+                    identifier.name.unescaped
+                case let member as MemberTypeSyntax:
+                    member.name.unescaped
+                default:
+                    nil
+                }
+                if  typeName != decl.name.unescaped {
+                    context[.error, candidate.attribute] = """
                     ‘@Discriminated’ must specify ‘by: \(decl.name.text).self’
                     """
                     return []
                 }
             } else {
-                context[.error, attribute] = """
+                context[.error, candidate.attribute] = """
                 ‘@Discriminated’ nested inside ‘@Discriminant’ must specify \
                 ‘by: \(decl.name.text).self’
                 """
@@ -78,24 +63,10 @@ extension DiscriminantMacro: MemberMacro {
             }
         }
 
-        let cases: [DiscriminatedMacro.Case] = DiscriminatedMacro.cases(of: targetEnum)
         var members: [DeclSyntax] = []
-
-        for `case`: DiscriminatedMacro.Case in cases {
-            members.append(
-                DeclSyntax.init(
-                    EnumCaseDeclSyntax.init(
-                        caseKeyword: .keyword(.case, trailingTrivia: .spaces(1))
-                    ) {
-                        EnumCaseElementSyntax.init(
-                            name: `case`.name,
-                            trailingTrivia: .newlines(1)
-                        )
-                    }
-                )
-            )
+        for element: EnumCaseElementSyntax in candidate.enum.caseElements {
+            members.append(DeclSyntax.init(EnumCaseDeclSyntax.init(case: element.name)))
         }
-
         return members
     }
 }

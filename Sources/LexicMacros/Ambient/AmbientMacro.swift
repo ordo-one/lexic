@@ -17,63 +17,51 @@ extension AmbientMacro: MemberMacro {
 
         var members: [DeclSyntax] = []
 
-        for member: MemberBlockItemSyntax in decl.memberBlock.members {
-            guard let enumCase: EnumCaseDeclSyntax = member.decl.as(
-                EnumCaseDeclSyntax.self
-            ) else {
+        for element: EnumCaseElementSyntax in decl.caseElements {
+            guard
+            let list: EnumCaseParameterListSyntax = element.parameterClause?.parameters,
+               !list.isEmpty else {
                 continue
             }
-            for element: EnumCaseElementSyntax in enumCase.elements {
-                guard
-                let list: EnumCaseParameterListSyntax = element.parameterClause?.parameters,
-                   !list.isEmpty else {
-                    continue
-                }
 
-                var arguments: [String] = []
-                var canSynthesize: Bool = true
+            var arguments: [String] = []
+            var canSynthesize: Bool = true
 
-                for parameter: EnumCaseParameterSyntax in list {
-                    if  parameter.type.isUnsugaredOptional {
-                        context[.warning, parameter.type] = """
-                        spelling ‘\(parameter.type.trimmed)’ will not be optimized; \
-                        use sugared optional ‘?’ instead
-                        """
-                    }
+            for parameter: EnumCaseParameterSyntax in list {
+                context[.warning, parameter.type] = parameter.type.isUnsugaredOptionalDiagnostic
 
-                    let isOptional: Bool = parameter.type.isOptional
-                    if  let defaultValue: InitializerClauseSyntax = parameter.defaultValue {
-                        let value: String = defaultValue.value.trimmedDescription
-                        if  let label: TokenSyntax = parameter.firstName, label.text != "_" {
-                            arguments.append("\(label.text): \(value)")
-                        } else {
-                            arguments.append(value)
-                        }
-                    } else if isOptional {
-                        if  let label: TokenSyntax = parameter.firstName, label.text != "_" {
-                            arguments.append("\(label.text): nil")
-                        } else {
-                            arguments.append("nil")
-                        }
+                let isOptional: Bool = parameter.type.isOptional
+                if  let defaultValue: InitializerClauseSyntax = parameter.defaultValue {
+                    let value: String = defaultValue.value.trimmedDescription
+                    if  let label: TokenSyntax = parameter.firstName, label.text != "_" {
+                        arguments.append("\(label.text): \(value)")
                     } else {
-                        canSynthesize = false
+                        arguments.append(value)
                     }
+                } else if isOptional {
+                    if  let label: TokenSyntax = parameter.firstName, label.text != "_" {
+                        arguments.append("\(label.text): nil")
+                    } else {
+                        arguments.append("nil")
+                    }
+                } else {
+                    canSynthesize = false
                 }
-
-                guard canSynthesize else {
-                    continue
-                }
-
-                let argumentsList: String = arguments.joined(separator: ", ")
-
-                let accessor: DeclSyntax = """
-                \(raw: decl.inlinable)\(decl.modifiersForMember)static var \
-                \(raw: element.name): Self {
-                    .\(raw: element.name)(\(raw: argumentsList))
-                }
-                """
-                members.append(accessor)
             }
+
+            guard canSynthesize else {
+                continue
+            }
+
+            let argumentsList: String = arguments.joined(separator: ", ")
+
+            let accessor: DeclSyntax = """
+            \(raw: decl.inlinable)\(decl.modifiersForMember)static var \
+            \(raw: element.name): Self {
+                .\(raw: element.name)(\(raw: argumentsList))
+            }
+            """
+            members.append(accessor)
         }
 
         return members
