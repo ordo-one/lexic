@@ -3,8 +3,7 @@
 ///
 /// This macro is useful when an enumeration contains cases with associated values,
 /// but you need a lightweight representation of the cases without their payloads
-/// for hashing, serialization, or table-driven lookups. The generated peer enum
-/// automatically conforms to ``CaseIterable`` and ``Sendable``.
+/// for hashing, serialization, or table-driven lookups.
 ///
 /// ```swift
 /// @Discriminated(backing: String.self) enum Action {
@@ -17,7 +16,7 @@
 /// This generates:
 ///
 /// ```swift
-/// enum ActionType: String, CaseIterable, Sendable {
+/// enum ActionType: String {
 ///     case start
 ///     case stop
 ///     case reset
@@ -53,10 +52,10 @@
 /// synthesized directly on the nested variant enumeration.
 ///
 /// - Parameters:
-///   - backing: An optional raw-value type (such as `Int.self` or `String.self`)
-///     for the synthesized peer enumeration.
 ///   - by: An optional explicit discriminator type to return from the synthesized
 ///     `type` property. When specified, peer synthesis is disabled.
+///   - backing: An optional raw-value type (such as `Int.self` or `String.self`)
+///     for the synthesized peer enumeration.
 @attached(
     peer,
     names: suffixed(Type)

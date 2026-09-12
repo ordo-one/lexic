@@ -162,7 +162,7 @@ The `@Discriminated` macro synthesizes a peer enumeration suffixed with `Type` c
 }
 
 /* --- EXPANDS TO --- */
-enum ActionType: String, CaseIterable, Sendable {
+enum ActionType: String {
     case start
     case stop
     case reset
@@ -181,7 +181,7 @@ var type: ActionType {
 }
 ```
 
-The generated discriminator automatically conforms to `CaseIterable` and `Sendable`. You can provide an optional raw backing type using `backing:`. Because the synthesized peer name is deterministically suffixed with `Type`, `@Discriminated` can be attached directly to top-level enumerations declared at file scope.
+You can provide an optional raw backing type using `backing:`. Because the synthesized peer name is deterministically suffixed with `Type`, `@Discriminated` can be attached directly to top-level enumerations declared at file scope.
 
 
 ### Nested discriminated unions with @Discriminant
@@ -224,7 +224,7 @@ Call sites can obtain the discriminator tag from a variant value using the `.typ
 let type: TooltipType = value.type // .text
 ```
 
-The outer `@Discriminant` macro automatically detects the nested enum annotated with `@Discriminated(by:backing:)`. Raw backing types (such as `enum TooltipType: String`) are fully supported by applying the raw type directly to the host enum declaration.
+The outer `@Discriminant` macro automatically detects the nested enum annotated with `@Discriminated(by:)`. Raw backing types (such as `enum TooltipType: String`) are fully supported by applying the raw type directly to the host enum declaration.
 
 
 ## Ambient constructors with @ambient

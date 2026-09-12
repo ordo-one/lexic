@@ -1,5 +1,5 @@
-/// Synthesizes discriminator cases and a mapping initializer on an outer enumeration
-/// that wraps a nested variant enumeration annotated with `@Discriminated(by:)`.
+/// Synthesizes discriminator cases on an outer enumeration that wraps a nested
+/// variant enumeration annotated with `@Discriminated(by:)`.
 ///
 /// When modeling a discriminated union where the discriminator tag must be a top-level
 /// type (such as for single-token TypeScript API bindings), `@Discriminant` allows you
