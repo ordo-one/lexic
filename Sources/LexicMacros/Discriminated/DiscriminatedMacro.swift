@@ -3,22 +3,6 @@ import SwiftSyntax
 import SwiftSyntaxMacros
 
 struct DiscriminatedMacro {}
-extension DiscriminatedMacro {
-    static func cases(of decl: EnumDeclSyntax) -> [Case] {
-        var cases: [Case] = []
-        for member: MemberBlockItemSyntax in decl.memberBlock.members {
-            guard let enumCase: EnumCaseDeclSyntax = member.decl.as(
-                EnumCaseDeclSyntax.self
-            ) else {
-                continue
-            }
-            for element: EnumCaseElementSyntax in enumCase.elements {
-                cases.append(.init(from: element))
-            }
-        }
-        return cases
-    }
-}
 extension DiscriminatedMacro: PeerMacro {
     static func expansion(
         of attribute: AttributeSyntax,
@@ -30,52 +14,26 @@ extension DiscriminatedMacro: PeerMacro {
             return []
         }
 
-        guard let configuration: Configuration = .init(decoding: attribute, in: context) else {
+        guard
+        let configuration: Configuration = .init(decoding: attribute, in: context) else {
+            return []
+        }
+        if  case _? = configuration.by {
             return []
         }
 
-        let cases: [Case] = Self.cases(of: decl)
-        let casesList: MemberBlockItemListSyntax = .init {
-            for `case`: Case in cases {
-                EnumCaseDeclSyntax.init(
-                    caseKeyword: .keyword(.case, trailingTrivia: .spaces(1))
-                ) {
-                    EnumCaseElementSyntax.init(
-                        name: `case`.name,
-                        trailingTrivia: .newlines(1)
-                    )
-                }
+        let cases: MemberBlockItemListSyntax = .init {
+            for element: EnumCaseElementSyntax in decl.cases {
+                EnumCaseDeclSyntax.init(case: element.name)
             }
         }
 
-        let attributesOnType: [AttributeListSyntax.Element] = decl.attributes.reduce(into: []) {
-            guard
-            case .attribute(let attribute) = $1,
-            let identifier: IdentifierTypeSyntax = attribute.attributeName.as(
-                IdentifierTypeSyntax.self
-            ) else {
-                return
-            }
-            switch identifier.name.text {
-            case "frozen": break
-            case "usableFromInline", "_usableFromInline": break
-            default: return
-            }
-
-            $0.append($1)
-        }
-
-        let inheritance: String = if let backing: TypeSyntax = configuration.backing {
-            ": \(backing), CaseIterable, Sendable"
-        } else {
-            ": CaseIterable, Sendable"
-        }
-
-        let peerTypeName: String = configuration.discriminant ?? "\(decl.name.text)Type"
+        let type: String = "\(decl.name.text)Type"
         let peer: DeclSyntax = """
-        \(AttributeListSyntax.init(attributesOnType))\
-        \(decl.modifiersForMember)enum \(raw: peerTypeName)\(raw: inheritance) {
-        \(casesList)
+        \(decl.attributes.mirroredAsTypeForType)\(decl.modifiersForMember)\
+        enum \(raw: type)\
+        \(raw: configuration.backing.map { ": \($0)" } ?? "") {
+        \(cases)
         }
         """
 
@@ -98,14 +56,17 @@ extension DiscriminatedMacro: MemberMacro {
             return []
         }
 
-        let cases: [Case] = Self.cases(of: decl)
         // Discriminator ‘type’ property
-        let peerTypeName: String = configuration.discriminant ?? "\(decl.name.text)Type"
-        let typeCases: [String] = cases.map { "case .\($0.name): .\($0.name)" }
+        let type: String = if let by: TypeSyntax = configuration.by {
+            by.trimmedDescription
+        } else {
+            "\(decl.name.text)Type"
+        }
+        let cases: [String] = decl.cases.map { "case .\($0.name): .\($0.name)" }
         let typeProperty: DeclSyntax = """
-        \(raw: decl.inlinable)\(decl.modifiersForMember)var type: \(raw: peerTypeName) {
+        \(decl.attributesForMember)\(decl.modifiersForMember)var type: \(raw: type) {
             switch self {
-            \(raw: typeCases.joined(separator: "\n    "))
+            \(raw: cases.joined(separator: "\n    "))
             }
         }
         """

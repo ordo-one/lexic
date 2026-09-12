@@ -46,45 +46,28 @@ extension ProjectionMacro: MemberMacro {
             return []
         }
 
-        if returnType.isUnsugaredOptional {
-            context[.warning, returnType] = """
-            spelling ‘\(returnType.trimmed)’ will not be optimized; \
-            use sugared optional ‘?’ instead
-            """
-        }
+        context[.warning, returnType] = returnType.isUnsugaredOptionalDiagnostic
 
         var projectionCases: [String] = []
-        for member: MemberBlockItemSyntax in decl.memberBlock.members {
-            guard let enumCase: EnumCaseDeclSyntax = member.decl.as(
-                EnumCaseDeclSyntax.self
-            ) else {
+        for element: EnumCaseElementSyntax in decl.cases {
+            guard
+            let list: EnumCaseParameterListSyntax = element.parameterClause?.parameters,
+                list.count == 1,
+            let parameter: EnumCaseParameterSyntax = list.first else {
                 continue
             }
-            for element: EnumCaseElementSyntax in enumCase.elements {
-                guard
-                let list: EnumCaseParameterListSyntax = element.parameterClause?.parameters,
-                    list.count == 1,
-                let parameter: EnumCaseParameterSyntax = list.first else {
-                    continue
-                }
 
-                if parameter.type.isUnsugaredOptional {
-                    context[.warning, parameter.type] = """
-                    spelling ‘\(parameter.type.trimmed)’ will not be optimized; \
-                    use sugared optional ‘?’ instead
-                    """
-                }
+            context[.warning, parameter.type] = parameter.type.isUnsugaredOptionalDiagnostic
 
-                let pattern: String = if parameter.type.isOptional {
-                    "let scope?"
-                } else {
-                    "let scope"
-                }
-
-                projectionCases.append(
-                    "case .\(element.name)(\(pattern)): Self.\(configuration.through)(scope)"
-                )
+            let pattern: String = if parameter.type.isOptional {
+                "let scope?"
+            } else {
+                "let scope"
             }
+
+            projectionCases.append(
+                "case .\(element.name)(\(pattern)): Self.\(configuration.through)(scope)"
+            )
         }
 
         let propertyType: TypeSyntax = if configuration.flatten,
@@ -95,7 +78,7 @@ extension ProjectionMacro: MemberMacro {
         }
 
         let projectionProperty: DeclSyntax = """
-        \(raw: decl.inlinable)\(decl.modifiersForMember)var \
+        \(decl.attributesForMember)\(decl.modifiersForMember)var \
         \(raw: configuration.through): \(propertyType) {
             switch self {
             \(raw: projectionCases.joined(separator: "\n    "))

@@ -1,42 +1,38 @@
+import Lexic
 import SwiftSyntax
 
 extension EnumDeclSyntax {
-    var isPublicOrPackage: Bool {
+    var packageOrHigher: Bool {
         self.modifiers.contains {
             $0.name.text == "public" || $0.name.text == "package"
         }
     }
-
-    var isUsableFromInline: Bool {
-        self.attributes.contains {
-            guard case .attribute(let attribute) = $0 else {
-                return false
+}
+extension EnumDeclSyntax {
+    func attributesForMember(inlinable: Bool) -> AttributeListSyntax {
+        var attributes: AttributeListSyntax = self.attributes.mirroredAsTypeForMember
+        if  inlinable {
+            let qualifies: Bool = self.packageOrHigher || self.attributes.contains {
+                $0 == "usableFromInline"
             }
-            if  let identifier: IdentifierTypeSyntax = attribute.attributeName.as(
-                    IdentifierTypeSyntax.self
-                ) {
-                return identifier.name.text == "usableFromInline"
-                    || identifier.name.text == "_usableFromInline"
+            if  qualifies {
+                attributes.append(.attribute("@inlinable "))
             }
-            if  let member: MemberTypeSyntax = attribute.attributeName.as(
-                    MemberTypeSyntax.self
-                ) {
-                return member.name.text == "usableFromInline"
-                    || member.name.text == "_usableFromInline"
-            }
-            return false
         }
+        return attributes
     }
 
-    var isInlinable: Bool {
-        self.isPublicOrPackage || self.isUsableFromInline
-    }
-
-    var inlinable: String {
-        self.isInlinable ? "@inlinable " : ""
+    var attributesForMember: AttributeListSyntax {
+        self.attributesForMember(inlinable: true)
     }
 
     var modifiersForMember: DeclModifierListSyntax {
         self.modifiers.filter { $0.name.text != "indirect" }
+    }
+
+    var cases: [EnumCaseElementSyntax] {
+        self.memberBlock.members.flatMap {
+            $0.decl.as(EnumCaseDeclSyntax.self)?.elements ?? []
+        }
     }
 }

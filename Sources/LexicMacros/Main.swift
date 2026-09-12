@@ -5,6 +5,7 @@ import SwiftSyntaxMacros
         AmbientMacro.self,
         BijectionMacro.self,
         DiscriminatedMacro.self,
+        DiscriminantMacro.self,
         ProjectionMacro.self,
     ]
 }
