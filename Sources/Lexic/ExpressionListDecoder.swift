@@ -8,8 +8,8 @@ public import SwiftSyntax
 extension ExpressionListDecoder {
     public init(indexing attribute: borrowing AttributeSyntax) {
         if  let arguments: LabeledExprListSyntax = attribute.arguments?.as(
-            LabeledExprListSyntax.self
-        ) {
+                LabeledExprListSyntax.self
+            ) {
             self.init(indexing: arguments, in: attribute.attributeName)
         } else {
             self.init(indexing: LabeledExprListSyntax.init([]), in: attribute.attributeName)
