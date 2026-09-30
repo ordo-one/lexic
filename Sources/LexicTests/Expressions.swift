@@ -77,7 +77,8 @@ import Lexic
         #expect {
             try Call.init(decoding: node)
         } throws: { error in
-            guard case ExpressionListDecodingError.missing(let label, in: let owner) = error else {
+            guard
+            case ExpressionListDecodingError.missing(let label, in: let owner) = error else {
                 return false
             }
             return label?.text == "name" && owner.trimmedDescription == "MyFunc"

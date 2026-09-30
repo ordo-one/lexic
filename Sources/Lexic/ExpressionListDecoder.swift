@@ -23,7 +23,7 @@ extension ExpressionListDecoder {
         )
     }
 
-    init(
+    private init(
         indexing arguments: borrowing LabeledExprListSyntax,
         in owner: borrowing some SyntaxProtocol
     ) {
@@ -38,8 +38,8 @@ extension ExpressionListDecoder {
     }
 }
 extension ExpressionListDecoder {
-    /// Returns the syntax node associated with the attribute or called expression from which this
-    /// expression list decoder was created.
+    /// Returns the syntax node associated with the attribute or called expression from which
+    /// this expression list decoder was created.
     public var node: Syntax { self.owner }
 }
 extension ExpressionListDecoder {
