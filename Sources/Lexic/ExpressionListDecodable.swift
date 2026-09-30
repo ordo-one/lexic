@@ -47,28 +47,3 @@ extension ExpressionListDecodable {
         }
     }
 }
-extension ExpressionListDecodable {
-    public init(
-        decoding arguments: borrowing LabeledExprListSyntax,
-        in owner: borrowing some SyntaxProtocol
-    ) throws {
-        var decoder: ExpressionListDecoder<CodingKey> = .init(indexing: arguments, in: owner)
-        try self.init(from: &decoder)
-    }
-
-    public init?(
-        decoding arguments: borrowing LabeledExprListSyntax,
-        in owner: borrowing some SyntaxProtocol,
-        in context: some MacroExpansionContext
-    ) {
-        do {
-            self = try .init(decoding: arguments, in: owner)
-        } catch let error as any MacroExpansionError {
-            context[.error, error.node] = "\(error)"
-            return nil
-        } catch let error {
-            context[.error, Syntax.init(copy owner)] = "\(error)"
-            return nil
-        }
-    }
-}

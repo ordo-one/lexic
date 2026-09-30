@@ -84,7 +84,7 @@ import Lexic
         }
     }
 
-    @Test static func CustomExpectedDescription() throws {
+    @Test static func CustomExpectation() throws {
         let expr: ExprSyntax = """
         "0OIl"
         """

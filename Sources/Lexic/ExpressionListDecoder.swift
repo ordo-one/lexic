@@ -23,7 +23,7 @@ extension ExpressionListDecoder {
         )
     }
 
-    public init(
+    init(
         indexing arguments: borrowing LabeledExprListSyntax,
         in owner: borrowing some SyntaxProtocol
     ) {

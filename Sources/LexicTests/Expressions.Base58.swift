@@ -2,7 +2,7 @@ import Lexic
 
 extension Expressions {
     struct Base58: ExpressionDecodableFromStringLiteral {
-        static let expectedDescription: String = "a base58 string literal"
+        static let expectation: String = "a base58 string literal"
 
         let string: String
 

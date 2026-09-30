@@ -2,14 +2,14 @@ public import SwiftSyntax
 
 public protocol ExpressionDecodableFromStringLiteral:
     ExpressionDecodable<StringLiteralExprSyntax> {
-    /// A human-readable description of the expected value used in diagnostic messages.
+    /// The expected syntax or semantic form used in diagnostic messages.
     /// Defaults to “a valid instance of <Type>”.
-    static var expectedDescription: String { get }
+    static var expectation: String { get }
 
     init?(_ string: String)
 }
 extension ExpressionDecodableFromStringLiteral {
-    public static var expectedDescription: String {
+    public static var expectation: String {
         "a valid instance of \(String.init(reflecting: Self.self))"
     }
 
@@ -22,7 +22,7 @@ extension ExpressionDecodableFromStringLiteral {
 
         guard
         let value: Self = .init(segment.content.text) else {
-            throw node.expected(Self.expectedDescription)
+            throw node.expected(Self.expectation)
         }
 
         self = value
