@@ -56,4 +56,47 @@ import Lexic
         /// direct `==` comparison will fail, likely due to source location metadata
         #expect("\(value.type)" == "\(TypeSyntax.init(expected))")
     }
+
+    @Test static func FunctionCall() throws {
+        let expr: ExprSyntax = """
+        MyFunc(name: "hello", value: 42)
+        """
+        let node: FunctionCallExprSyntax = expr.cast(FunctionCallExprSyntax.self)
+
+        let value: Call = try .init(decoding: node)
+        #expect(value.name == "hello")
+        #expect(value.value == 42)
+    }
+
+    @Test static func FunctionCallMissingArgument() throws {
+        let expr: ExprSyntax = """
+        MyFunc(value: 42)
+        """
+        let node: FunctionCallExprSyntax = expr.cast(FunctionCallExprSyntax.self)
+
+        #expect {
+            try Call.init(decoding: node)
+        } throws: { error in
+            guard
+            case ExpressionListDecodingError.missing(let label, in: let owner) = error else {
+                return false
+            }
+            return label == "name" && owner.trimmedDescription == "MyFunc"
+        }
+    }
+
+    @Test static func CustomExpectation() throws {
+        let expr: ExprSyntax = """
+        "0OIl"
+        """
+        let node: StringLiteralExprSyntax = expr.cast(StringLiteralExprSyntax.self)
+        #expect {
+            try Base58.init(from: node)
+        } throws: { error in
+            guard let error: ExpressionDecodingError = error as? ExpressionDecodingError else {
+                return false
+            }
+            return error.description == "expected a base58 string literal"
+        }
+    }
 }

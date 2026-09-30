@@ -2,18 +2,32 @@ public import SwiftSyntax
 
 @frozen public struct ExpressionListDecoder<CodingKey>: ~Copyable
     where CodingKey: Hashable & Sendable & RawRepresentable<String> {
-    private let owner: TypeSyntax
+    private let owner: Syntax
     private var index: [CodingKey: ArraySlice<LabeledExprSyntax>]
 }
 extension ExpressionListDecoder {
     public init(indexing attribute: borrowing AttributeSyntax) {
-        self.init(owner: attribute.attributeName, index: [:])
-
-        guard let arguments: LabeledExprListSyntax = attribute.arguments?.as(
-            LabeledExprListSyntax.self
-        ) else {
-            return
+        if  let arguments: LabeledExprListSyntax = attribute.arguments?.as(
+                LabeledExprListSyntax.self
+            ) {
+            self.init(indexing: arguments, in: attribute.attributeName)
+        } else {
+            self.init(indexing: LabeledExprListSyntax.init([]), in: attribute.attributeName)
         }
+    }
+
+    public init(indexing call: borrowing FunctionCallExprSyntax) {
+        self.init(
+            indexing: call.arguments,
+            in: call.calledExpression
+        )
+    }
+
+    private init(
+        indexing arguments: borrowing LabeledExprListSyntax,
+        in owner: borrowing some SyntaxProtocol
+    ) {
+        self.init(owner: Syntax.init(owner), index: [:])
 
         for argument: LabeledExprSyntax in arguments {
             // don’t bother diagnosing invalid keys, we rely on the swift compiler to catch that
@@ -24,9 +38,9 @@ extension ExpressionListDecoder {
     }
 }
 extension ExpressionListDecoder {
-    /// Returns the token associated with the name of the attribute from which this expression
-    /// list decoder was created.
-    public var node: TypeSyntax { self.owner }
+    /// Returns the syntax node associated with the attribute or called expression from which
+    /// this expression list decoder was created.
+    public var node: Syntax { self.owner }
 }
 extension ExpressionListDecoder {
     public subscript(key: CodingKey) -> ExpressionListDecoderField<ExprSyntax>? {
@@ -35,7 +49,7 @@ extension ExpressionListDecoder {
                 return nil
             }
             return .init(
-                label: field.label,
+                label: field.label?.trimmed.text,
                 value: field.expression,
                 owner: self.owner,
             )
@@ -48,7 +62,7 @@ extension ExpressionListDecoder {
                 // decode the same argument twice (or more times)
                 if  case nil = $0 {
                     return .init(
-                        label: nil,
+                        label: key.rawValue,
                         value: nil,
                         owner: self.owner,
                         missing: true
@@ -56,7 +70,7 @@ extension ExpressionListDecoder {
                 } else {
                     let field: LabeledExprSyntax? = $0?.popFirst()
                     return .init(
-                        label: field?.label,
+                        label: field?.label?.trimmed.text ?? key.rawValue,
                         value: field?.expression,
                         owner: self.owner,
                     )

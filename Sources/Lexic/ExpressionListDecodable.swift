@@ -26,3 +26,24 @@ extension ExpressionListDecodable {
         }
     }
 }
+extension ExpressionListDecodable {
+    public init(decoding call: borrowing FunctionCallExprSyntax) throws {
+        var decoder: ExpressionListDecoder<CodingKey> = .init(indexing: call)
+        try self.init(from: &decoder)
+    }
+
+    public init?(
+        decoding call: borrowing FunctionCallExprSyntax,
+        in context: some MacroExpansionContext
+    ) {
+        do {
+            self = try .init(decoding: call)
+        } catch let error as any MacroExpansionError {
+            context[.error, error.node] = "\(error)"
+            return nil
+        } catch let error {
+            context[.error, copy call] = "\(error)"
+            return nil
+        }
+    }
+}
