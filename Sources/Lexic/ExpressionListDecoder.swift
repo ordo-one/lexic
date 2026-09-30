@@ -49,7 +49,7 @@ extension ExpressionListDecoder {
                 return nil
             }
             return .init(
-                label: field.label,
+                label: field.label?.trimmed.text,
                 value: field.expression,
                 owner: self.owner,
             )
@@ -62,7 +62,7 @@ extension ExpressionListDecoder {
                 // decode the same argument twice (or more times)
                 if  case nil = $0 {
                     return .init(
-                        label: TokenSyntax.identifier(key.rawValue),
+                        label: key.rawValue,
                         value: nil,
                         owner: self.owner,
                         missing: true
@@ -70,7 +70,7 @@ extension ExpressionListDecoder {
                 } else {
                     let field: LabeledExprSyntax? = $0?.popFirst()
                     return .init(
-                        label: field?.label ?? TokenSyntax.identifier(key.rawValue),
+                        label: field?.label?.trimmed.text ?? key.rawValue,
                         value: field?.expression,
                         owner: self.owner,
                     )
@@ -78,5 +78,4 @@ extension ExpressionListDecoder {
             } (&self.index[key])
         }
     }
-
 }

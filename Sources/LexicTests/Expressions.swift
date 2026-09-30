@@ -81,7 +81,7 @@ import Lexic
             case ExpressionListDecodingError.missing(let label, in: let owner) = error else {
                 return false
             }
-            return label?.text == "name" && owner.trimmedDescription == "MyFunc"
+            return label == "name" && owner.trimmedDescription == "MyFunc"
         }
     }
 
