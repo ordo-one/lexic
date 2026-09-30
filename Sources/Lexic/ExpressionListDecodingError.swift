@@ -1,16 +1,16 @@
 public import SwiftSyntax
 
 @frozen public enum ExpressionListDecodingError: Error {
-    case consumed(TokenSyntax?, in: TypeSyntax)
-    case missing(TokenSyntax?, in: TypeSyntax)
+    case consumed(TokenSyntax?, in: Syntax)
+    case missing(TokenSyntax?, in: Syntax)
     case invalid(TokenSyntax?, because: ExpressionDecodingError)
 }
 
 extension ExpressionListDecodingError: MacroExpansionError {
     public var node: Syntax {
         switch self {
-        case .consumed(_, in: let node): Syntax.init(node)
-        case .missing(_, in: let node): Syntax.init(node)
+        case .consumed(_, in: let node): node
+        case .missing(_, in: let node): node
         case .invalid(_, because: let reason): Syntax.init(reason.node)
         }
     }

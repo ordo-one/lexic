@@ -3,13 +3,13 @@ public import SwiftSyntax
 @frozen public struct ExpressionListDecoderField<Value> {
     public let label: TokenSyntax?
     public let value: Value
-    private let owner: TypeSyntax
+    private let owner: Syntax
     private let missing: Bool
 
     init(
         label: TokenSyntax?,
         value: Value,
-        owner: TypeSyntax,
+        owner: Syntax,
         missing: Bool = false
     ) {
         self.label = label
