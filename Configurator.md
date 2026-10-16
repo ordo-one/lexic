@@ -84,5 +84,16 @@ Some edge cases to look out for:
     empty closure were passed to the final argument. In this situation, the macro is less
     useful, but should still degrade gracefully.
 
+To handle generic error parameters without performing surgery on generic `where` clauses,
+`Lexic` provides `TypeSyntax.contains(symbol:)` and
+`GenericRequirementSyntax.contains(symbol:)`. When the trailing closure throws a typed error
+`E` declared as a generic parameter on the initializer, the macro can use these helpers to
+check whether `E` is referenced in any preceding parameter types, inherited generic
+constraints, or `where` clause requirements. If `E` appears only as the thrown error type, the
+macro can safely drop `E` from the peer initializer’s generic parameter list while leaving any
+remaining generic parameters and `where` clause untouched. If `E` is constrained in the `where`
+clause or referenced by another parameter, the macro should refuse to strip `E` and emit a
+diagnostic.
+
 If the final parameter type is a non-throwing closure, the macro should refuse to generate any
 peer declarations, and instead instruct the user to provide a default argument instead.
