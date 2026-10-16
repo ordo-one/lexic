@@ -1,5 +1,6 @@
-AGENTS.md
 README.md
+AGENTS.md
+CONTRIBUTORS.md
 LICENSE
 NOTICE
 .mailmap
@@ -9,4 +10,5 @@ NOTICE
 .github/workflows/Deploy.yml
 .github/workflows/Security.yml
 .github/workflows/SemanticRelease.yml
+.github/workflows/SemanticReleaseDispatch.yml
 .github/workflows/SemanticTitle.yml

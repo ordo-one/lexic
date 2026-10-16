@@ -14,7 +14,7 @@ struct BijectionMacro: PeerMacro {
         var type: TypeSyntax = binding.typeAnnotation?.type.trimmed,
         let accessors: AccessorBlockSyntax.Accessors = binding.accessorBlock?.accessors else {
             context[.error, attribute] = """
-            '@Bijection' must be applied to a computed property
+            ‘@Bijection’ must be applied to a computed property
             """
             return []
         }
@@ -47,8 +47,8 @@ struct BijectionMacro: PeerMacro {
             let expression: SwitchExprSyntax = statement.expression.as(SwitchExprSyntax.self),
             case nil = mapping else {
                 context[.warning, statement] = """
-                body of '@Bijection' mapping should contain only a single switch-case block, \
-                with the 'return' keyword elided
+                body of ‘@Bijection’ mapping should contain only a single switch-case block, \
+                with the ‘return’ keyword elided
                 """
                 continue
             }
@@ -59,7 +59,7 @@ struct BijectionMacro: PeerMacro {
 
         guard let mapping: SwitchExprSyntax else {
             context[.error, binding] = """
-            body of '@Bijection' mapping must contain a switch-case block
+            body of ‘@Bijection’ mapping must contain a switch-case block
             """
             return []
         }
@@ -80,7 +80,7 @@ struct BijectionMacro: PeerMacro {
             let value: CodeBlockItemSyntax = pair.statements.first,
             let value: ExprSyntax = value.item.as(ExprSyntax.self) else {
                 context[.error, pair.statements] = """
-                case body must be a single expression, with the 'return' keyword elided
+                case body must be a single expression, with the ‘return’ keyword elided
                 """
                 return
             }
@@ -96,28 +96,6 @@ struct BijectionMacro: PeerMacro {
             type = "some \(raw: generic)"
         }
 
-        // Copy the access control from the original declaration.
-        var attributes: [AttributeSyntax] = []
-        for case .attribute(let node) in decl.attributes {
-            let attribute: TypeSyntax = node.attributeName
-
-            guard
-            let attribute: IdentifierTypeSyntax = attribute.as(IdentifierTypeSyntax.self) else {
-                continue
-            }
-
-            switch attribute.name.text {
-            case "available": break
-            case "backDeployed": break
-            case "inlinable": break
-            case "inline": break
-            case "usableFromInline": break
-            default: continue
-            }
-
-            attributes.append(node.trimmed)
-        }
-
         /// Note: `borrowing` is inserted, which is meaningful if the value is a ``String`` or
         /// some other allocated type, as `init`s default to `__owned`.
         ///
@@ -126,7 +104,7 @@ struct BijectionMacro: PeerMacro {
         /// constraint is specified. we cannot emit it unconditionally, as it will crash the
         /// compiler if the type is a tuple type :(
         let initializer: DeclSyntax = """
-        \(raw: attributes.map { "\($0) " }.joined())\(decl.modifiers)\
+        \(decl.attributes.mirroredAsMemberForMember)\(decl.modifiers)\
         init?(\(raw: configuration.label) $value: borrowing \(type)) {
             switch\(raw: configuration.where != nil ? " copy" : "") $value {
             \(raw: rows.lazy.map { "case \($1): self = \($0)" }.joined(separator: "\n    "))

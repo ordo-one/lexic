@@ -1,15 +1,15 @@
 public import SwiftSyntax
 
 @frozen public struct ExpressionListDecoderField<Value> {
-    public let label: TokenSyntax?
+    public let label: String?
     public let value: Value
-    private let owner: TypeSyntax
+    private let owner: Syntax
     private let missing: Bool
 
     init(
-        label: TokenSyntax?,
+        label: String?,
         value: Value,
-        owner: TypeSyntax,
+        owner: Syntax,
         missing: Bool = false
     ) {
         self.label = label
@@ -19,7 +19,7 @@ public import SwiftSyntax
     }
 }
 extension ExpressionListDecoderField {
-    @inlinable public var name: String { self.label?.text ?? "_" }
+    @inlinable public var name: String { self.label ?? "_" }
 }
 extension ExpressionListDecoderField<ExprSyntax> {
     public func decode<T>(
