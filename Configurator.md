@@ -51,8 +51,9 @@ struct ThrowsTyped {
 }
 ```
 
-The solution we propose is to have a macro named `@Configurator`, which can be applied to any
-initializer declaration whose final argument is a closure.
+The solution we propose is to have an attached peer macro (`@attached(peer, names: overloaded)`)
+named `@Configurator`, which can be applied to any initializer declaration whose final argument
+is a throwing closure returning `Void` (`()`).
 
 ```swift
 @Configurator public init<E>(
@@ -84,16 +85,61 @@ Some edge cases to look out for:
     empty closure were passed to the final argument. In this situation, the macro is less
     useful, but should still degrade gracefully.
 
+
+## Signature synthesis and parameter forwarding
+
+The generated peer initializer copies all parameters preceding the final closure parameter,
+preserving their external argument labels, internal parameter names, type annotations,
+parameter attributes (such as `@escaping` or `@Sendable`), and default argument expressions.
+In the delegating `self.init` call, parameters with wildcard (`_`) labels are passed unlabeled,
+labeled parameters are passed using their external argument label, and `inout` parameters are
+prefixed with `&`. For the final argument, the macro synthesizes an empty closure literal
+annotated with `throws(Never)` whose parameter list matches the arity and types of the closure
+parameter. Because Swift does not allow forwarding a variadic parameter directly to another
+variadic parameter, the macro rejects initializers containing variadic parameters with a
+diagnostic.
+
+The peer declaration also preserves the access control modifier, failability (`init?` or
+`init!`), and applicable attributes (such as `@inlinable` and `@available`, excluding
+`@Configurator` itself) from the original initializer. Because delegating to `self.init` within
+a class requires a convenience initializer, the macro inspects `context.lexicalContext` and
+inserts the `convenience` modifier when the enclosing type is a `ClassDeclSyntax` (if not
+already present).
+
+
+## Generics and effects propagation
+
 To handle generic error parameters without performing surgery on generic `where` clauses,
 `Lexic` provides `TypeSyntax.contains(symbol:)` and
 `GenericRequirementSyntax.contains(symbol:)`. When the trailing closure throws a typed error
-`E` declared as a generic parameter on the initializer, the macro can use these helpers to
-check whether `E` is referenced in any preceding parameter types, inherited generic
-constraints, or `where` clause requirements. If `E` appears only as the thrown error type, the
-macro can safely drop `E` from the peer initializer’s generic parameter list while leaving any
-remaining generic parameters and `where` clause untouched. If `E` is constrained in the `where`
-clause or referenced by another parameter, the macro should refuse to strip `E` and emit a
-diagnostic.
+`E` declared as a generic parameter on the initializer, the macro uses these helpers to check
+whether `E` is referenced in any preceding parameter types, inherited generic constraints, or
+`where` clause requirements. If `E` appears only as the thrown error type, the macro drops `E`
+from the peer initializer’s generic parameter list (removing the generic parameter clause
+entirely if `E` was the only generic parameter) while leaving any remaining generic parameters
+and the `where` clause untouched. If `E` is constrained in the `where` clause or referenced by
+another parameter, the macro refuses to strip `E` and emits a diagnostic.
 
-If the final parameter type is a non-throwing closure, the macro should refuse to generate any
-peer declarations, and instead instruct the user to provide a default argument instead.
+If the original initializer is `async`, the generated peer initializer is also `async` and
+delegates with `await self.init(...)`. When the original initializer throws `E` and `E` is
+substituted with `Never` by the empty closure, the peer initializer omits `throws` entirely.
+Likewise, if the original initializer uses `rethrows` and has no other throwing closure
+parameters, the peer initializer omits `rethrows` and becomes non-throwing, since Swift does
+not permit `rethrows` on declarations without throwing closure parameters. If the initializer
+has earlier throwing closure parameters or uses unconditional untyped `throws`, the generated
+peer retains the remaining `throws` or `rethrows` clause and delegates using `try self.init(...)`.
+
+
+## Diagnostics
+
+The macro should refuse to generate any peer declarations and emit a diagnostic in the
+following situations:
+
+-   The macro is attached to a declaration other than an initializer (`InitializerDeclSyntax`).
+-   The initializer has no parameters, or its final parameter is not a closure type.
+-   The final closure parameter has a non-`Void` return type.
+-   The final parameter type is a non-throwing closure, in which case the diagnostic should
+    instruct the user to provide a default argument (`= { _ in }`) instead.
+-   The closure’s generic error parameter is referenced in another parameter or constrained in
+    a `where` clause.
+-   Any preceding parameter is variadic.
