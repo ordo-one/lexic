@@ -1,4 +1,5 @@
 import Configurator
+import Testing
 
 extension Configurators {
     struct Asynchronous {
@@ -12,5 +13,11 @@ extension Configurators {
             self.x = x
             try body(&self)
         }
+    }
+}
+extension Configurators {
+    @Test static func AsynchronousInitializer() async {
+        let asynchronous: Asynchronous = await .init(x: 4)
+        #expect(asynchronous.x == 4)
     }
 }

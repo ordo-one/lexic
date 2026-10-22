@@ -1,4 +1,5 @@
 import Configurator
+import Testing
 
 extension Configurators {
     struct Other {
@@ -18,4 +19,15 @@ extension Configurators {
 }
 extension Configurators.Other {
     struct Failure: Error {}
+}
+extension Configurators {
+    @Test static func OtherThrowingClosure() throws {
+        let other: Other = .init(x: 8) { 9 }
+        #expect(other.x == 8)
+        #expect(other.y == 9)
+
+        #expect(throws: Other.Failure.self) {
+            try Other.init(x: 8) { throw Other.Failure.init() }
+        }
+    }
 }

@@ -1,4 +1,5 @@
 import Configurator
+import Testing
 
 extension Configurators {
     struct Forwarding {
@@ -20,5 +21,15 @@ extension Configurators {
             d += 1
             try body(&self)
         }
+    }
+}
+extension Configurators {
+    @Test static func ForwardedParameters() {
+        var d: Int = 3
+        let forwarding: Forwarding = .init(1, b: 2, d: &d)
+        #expect(forwarding.sum == 6)
+        #expect(forwarding.e == "e")
+        #expect(forwarding.default == 0)
+        #expect(d == 4)
     }
 }

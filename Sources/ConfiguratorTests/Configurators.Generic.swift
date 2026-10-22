@@ -1,4 +1,5 @@
 import Configurator
+import Testing
 
 extension Configurators {
     struct Generic {
@@ -11,5 +12,11 @@ extension Configurators {
             self.x = .init(x)
             try body(&self)
         }
+    }
+}
+extension Configurators {
+    @Test static func MultipleGenerics() {
+        let generic: Generic = .init(x: 7 as UInt8)
+        #expect(generic.x == 7)
     }
 }

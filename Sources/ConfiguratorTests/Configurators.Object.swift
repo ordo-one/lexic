@@ -1,4 +1,5 @@
 import Configurator
+import Testing
 
 extension Configurators {
     final class Object {
@@ -11,5 +12,11 @@ extension Configurators {
             self.x = x
             try body(self)
         }
+    }
+}
+extension Configurators {
+    @Test static func Convenience() {
+        let object: Object = .init(x: 5)
+        #expect(object.x == 5)
     }
 }

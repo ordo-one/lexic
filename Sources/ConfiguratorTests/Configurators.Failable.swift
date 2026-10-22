@@ -1,4 +1,5 @@
 import Configurator
+import Testing
 
 extension Configurators {
     struct Failable {
@@ -14,5 +15,12 @@ extension Configurators {
             self.x = x
             try body(&self)
         }
+    }
+}
+extension Configurators {
+    @Test static func FailableInitializer() {
+        let failable: Failable? = .init(x: 6)
+        #expect(failable?.x == 6)
+        #expect(Failable.init(x: -1) == nil)
     }
 }

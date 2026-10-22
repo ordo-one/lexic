@@ -1,4 +1,5 @@
 import Configurator
+import Testing
 
 extension Configurators {
     struct Typed {
@@ -11,5 +12,11 @@ extension Configurators {
             self.x = x
             try body(&self)
         }
+    }
+}
+extension Configurators {
+    @Test static func TypedError() {
+        let typed: Typed = .init(x: 1)
+        #expect(typed.x == 1)
     }
 }

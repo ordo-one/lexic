@@ -1,4 +1,5 @@
 import Configurator
+import Testing
 
 extension Configurators {
     struct Rethrowing {
@@ -11,5 +12,11 @@ extension Configurators {
             self.x = x
             try body(&self)
         }
+    }
+}
+extension Configurators {
+    @Test static func RethrowingInitializer() {
+        let rethrowing: Rethrowing = .init(x: 2)
+        #expect(rethrowing.x == 2)
     }
 }
