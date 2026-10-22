@@ -28,7 +28,7 @@
 /// ```
 ///
 /// The peer preserves the preceding parameters, access control, failability, `async`, and
-/// mirrored attributes such as `@available` and `@inlinable`. If the closure’s error type is
+/// mirrored attributes such as `@available`, `@inlinable`, and `@_spi`. If the closure’s error type is
 /// a generic parameter of the initializer that is not referenced anywhere else in the
 /// signature, it is removed from the peer. If the initializer uses `rethrows` and has no
 /// other throwing closure parameters, the peer does not throw. Otherwise the peer keeps the

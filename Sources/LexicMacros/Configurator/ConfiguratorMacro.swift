@@ -179,7 +179,7 @@ extension ConfiguratorMacro: PeerMacro {
             modifiers.append("convenience")
         }
 
-        let attributes: [String] = decl.attributes.mirroredAsMemberForMember.map {
+        let attributes: [String] = decl.attributes.mirroredAsMemberForOverload.map {
             $0.trimmedDescription
         }
 

@@ -288,6 +288,36 @@ import Testing
         )
     }
 
+    @Test static func SPI() {
+        let expansion: Expansion = .init(
+            """
+            struct S {
+                @Configurator @_spi(Private) public init<E>(
+                    x: Int,
+                    body: (inout Self) throws(E) -> ()
+                ) throws(E) {
+                }
+            }
+            """
+        )
+        expansion.expect(
+            """
+            struct S {
+                @_spi(Private) public init<E>(
+                    x: Int,
+                    body: (inout Self) throws(E) -> ()
+                ) throws(E) {
+                }
+
+                @_spi(Private) public init(x: Int) {
+                    self.init(x: x, body: { (_: inout Self) throws(Never) -> () in
+                        })
+                }
+            }
+            """
+        )
+    }
+
     @Test static func Forwarding() {
         let expansion: Expansion = .init(
             """
