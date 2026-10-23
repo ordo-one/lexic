@@ -250,6 +250,40 @@ static var recurring: Self {
 Parameters that define default arguments use those defaults in the synthesized constructor, while optional parameters without defaults receive `nil`. Cases without associated values (such as `.quick`) already support zero-argument dot syntax natively in Swift and are skipped. Any case containing non-optional parameters lacking default arguments—such as `.custom(deadline:)`—is also skipped.
 
 
+## Configuration closures with @Configurator
+
+Initializers often accept a trailing closure that lets the caller adjust the value under construction. When that closure can throw, it cannot simply be defaulted to `{ _ in }`: the default is upcast to a throwing closure, and every call site must be written with `try`, even when no closure is passed.
+
+The `@Configurator` macro synthesizes a peer initializer without the closure, which delegates to the original with an explicitly non-throwing closure. The closure’s error type resolves to `Never`, so the generated overload does not throw:
+
+```swift
+struct Account {
+    var name: String
+    var limit: Int = 0
+
+    @Configurator init<E>(
+        name: String,
+        body: (inout Self) throws(E) -> ()
+    ) throws(E) {
+        self.name = name
+        try body(&self)
+    }
+}
+
+/* --- EXPANDS TO --- */
+// Synthesized next to the original initializer:
+init(name: String) {
+    self.init(name: name, body: { (_: inout Self) throws(Never) -> () in })
+}
+
+let account: Account = .init(name: "x")
+```
+
+The peer preserves the preceding parameters with their labels, attributes, and default arguments, along with the access control, failability, and `async` of the original initializer. Attributes such as `@available`, `@inlinable`, and `@_spi` are mirrored. If the closure’s error type is a generic parameter of the initializer that nothing else in the signature refers to, it is removed from the peer; if the initializer uses `rethrows` and has no other throwing closure parameters, the peer does not throw. Otherwise, the peer keeps the original throws clause and delegates with `try`.
+
+When the initializer is declared directly inside a class, the macro inserts the `convenience` modifier automatically. Inside an extension of a class, write `convenience` on the original initializer and it will be mirrored.
+
+
 ## Polymorphic projection with @Projection
 
 Enumeration variants often carry disparate payload types that nevertheless share common concepts, such as a name, an identifier, or an account reference. Querying such attributes typically requires writing boilerplate `switch` blocks across every case.

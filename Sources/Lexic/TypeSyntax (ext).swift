@@ -145,3 +145,69 @@ extension TypeSyntax {
         return false
     }
 }
+extension TypeSyntax {
+    /// The function type this type denotes, looking through attributes, specifiers such as
+    /// `inout`, and redundant parentheses.
+    public var function: FunctionTypeSyntax? {
+        if  let function: FunctionTypeSyntax = self.as(FunctionTypeSyntax.self) {
+            return function
+        }
+        if  let attributed: AttributedTypeSyntax = self.as(AttributedTypeSyntax.self) {
+            return attributed.baseType.function
+        }
+        if  let tuple: TupleTypeSyntax = self.as(TupleTypeSyntax.self),
+                tuple.elements.count == 1,
+            let first: TupleTypeElementSyntax = tuple.elements.first,
+                first.firstName == nil {
+            return first.type.function
+        }
+        return nil
+    }
+
+    /// Indicates if this type is spelled as `()`, `Void`, or `Swift.Void`, looking through
+    /// redundant parentheses.
+    public var isVoid: Bool {
+        if  let tuple: TupleTypeSyntax = self.as(TupleTypeSyntax.self) {
+            if  tuple.elements.isEmpty {
+                return true
+            }
+            if  tuple.elements.count == 1,
+                let first: TupleTypeElementSyntax = tuple.elements.first,
+                    first.firstName == nil {
+                return first.type.isVoid
+            }
+            return false
+        }
+        if  let identifier: IdentifierTypeSyntax = self.as(IdentifierTypeSyntax.self) {
+            return identifier.name.unescaped == "Void"
+                && identifier.genericArgumentClause == nil
+        }
+        if  let member: MemberTypeSyntax = self.as(MemberTypeSyntax.self) {
+            guard
+            member.name.unescaped == "Void",
+            member.genericArgumentClause == nil,
+            let base: IdentifierTypeSyntax = member.baseType.as(
+                IdentifierTypeSyntax.self
+            ) else {
+                return false
+            }
+            return base.name.unescaped == "Swift"
+        }
+        return false
+    }
+
+    /// Indicates if this type carries the `inout` specifier.
+    public var `inout`: Bool {
+        guard
+        let attributed: AttributedTypeSyntax = self.as(AttributedTypeSyntax.self) else {
+            return false
+        }
+        return attributed.specifiers.contains {
+            guard
+            case .simpleTypeSpecifier(let specifier) = $0 else {
+                return false
+            }
+            return specifier.specifier.tokenKind == .keyword(.inout)
+        }
+    }
+}
