@@ -23,7 +23,7 @@ extension ConfiguratorMacro: PeerMacro {
             return []
         }
 
-        guard let function: FunctionTypeSyntax = closure.type.functionType else {
+        guard let function: FunctionTypeSyntax = closure.type.function else {
             context[.error, closure.type] = """
             final parameter of ‘@Configurator’ initializer must be a closure
             """
@@ -134,7 +134,7 @@ extension ConfiguratorMacro: PeerMacro {
         //  Determine the effects of the peer initializer.
         let effects: FunctionEffectSpecifiersSyntax? = decl.signature.effectSpecifiers
         let otherThrowingClosures: Bool = preceding.contains {
-            $0.type.functionType?.effectSpecifiers?.throwsClause != nil
+            $0.type.function?.effectSpecifiers?.throwsClause != nil
         }
 
         let throwsClause: ThrowsClauseSyntax?
@@ -172,7 +172,7 @@ extension ConfiguratorMacro: PeerMacro {
         let async: Bool = effects?.asyncSpecifier != nil
 
         //  Assemble the declaration.
-        var modifiers: [String] = decl.modifiers.map { $0.trimmedDescription }
+        var modifiers: [String] = decl.modifiers.map { "\($0.trimmed)" }
 
         if  case true? = context.lexicalContext.first?.is(ClassDeclSyntax.self),
            !modifiers.contains("convenience") {
@@ -180,7 +180,7 @@ extension ConfiguratorMacro: PeerMacro {
         }
 
         let attributes: [String] = decl.attributes.mirroredAsMemberForOverload.map {
-            $0.trimmedDescription
+            "\($0.trimmed)"
         }
 
         var prefix: String = attributes.joined(separator: " ")
@@ -193,7 +193,7 @@ extension ConfiguratorMacro: PeerMacro {
         }
 
         var signature: String = "("
-        signature += preceding.map { $0.with(\.trailingComma, nil).trimmedDescription }
+        signature += preceding.map { "\($0.with(\.trailingComma, nil).trimmed)" }
             .joined(separator: ", ")
         signature += ")"
 
@@ -201,15 +201,15 @@ extension ConfiguratorMacro: PeerMacro {
             signature += " async"
         }
         if  let throwsClause: ThrowsClauseSyntax {
-            signature += " \(throwsClause.trimmedDescription)"
+            signature += " \(throwsClause.trimmed)"
         }
         if  let whereClause: GenericWhereClauseSyntax = decl.genericWhereClause {
-            signature += " \(whereClause.trimmedDescription)"
+            signature += " \(whereClause.trimmed)"
         }
 
         var arguments: [String] = preceding.map {
             let name: TokenSyntax = $0.secondName ?? $0.firstName
-            let reference: String = $0.type.isInout ? "&\(name.text)" : name.text
+            let reference: String = $0.type.`inout` ? "&\(name.text)" : name.text
             if  case .wildcard = $0.firstName.tokenKind {
                 return reference
             } else {
@@ -218,7 +218,7 @@ extension ConfiguratorMacro: PeerMacro {
         }
 
         let closureParameters: String = function.parameters.map {
-            "_: \($0.type.trimmedDescription)"
+            "_: \($0.type.trimmed)"
         }.joined(separator: ", ")
 
         let closureLiteral: String = "{ (\(closureParameters)) throws(Never) -> () in }"
@@ -239,7 +239,7 @@ extension ConfiguratorMacro: PeerMacro {
 
         let peer: DeclSyntax = """
         \(raw: prefix)init\(raw: decl.optionalMark?.text ?? "")\
-        \(raw: generics?.trimmedDescription ?? "")\(raw: signature) {
+        \(raw: generics.map { "\($0.trimmed)" } ?? "")\(raw: signature) {
             \(raw: call)self.init(\(raw: arguments.joined(separator: ", ")))
         }
         """

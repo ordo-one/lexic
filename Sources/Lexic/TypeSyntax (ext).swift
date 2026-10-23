@@ -148,18 +148,18 @@ extension TypeSyntax {
 extension TypeSyntax {
     /// The function type this type denotes, looking through attributes, specifiers such as
     /// `inout`, and redundant parentheses.
-    public var functionType: FunctionTypeSyntax? {
+    public var function: FunctionTypeSyntax? {
         if  let function: FunctionTypeSyntax = self.as(FunctionTypeSyntax.self) {
             return function
         }
         if  let attributed: AttributedTypeSyntax = self.as(AttributedTypeSyntax.self) {
-            return attributed.baseType.functionType
+            return attributed.baseType.function
         }
         if  let tuple: TupleTypeSyntax = self.as(TupleTypeSyntax.self),
                 tuple.elements.count == 1,
             let first: TupleTypeElementSyntax = tuple.elements.first,
                 first.firstName == nil {
-            return first.type.functionType
+            return first.type.function
         }
         return nil
     }
@@ -197,7 +197,7 @@ extension TypeSyntax {
     }
 
     /// Indicates if this type carries the `inout` specifier.
-    public var isInout: Bool {
+    public var `inout`: Bool {
         guard
         let attributed: AttributedTypeSyntax = self.as(AttributedTypeSyntax.self) else {
             return false
