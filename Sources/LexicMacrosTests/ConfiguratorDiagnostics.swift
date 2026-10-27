@@ -1,3 +1,6 @@
+//  ‘@testable import’ of the macro plugin needs ‘-enable-testing’, so these tests exist in
+//  debug builds only; ‘Scripts/TestAll’ runs them from its debug build.
+#if DEBUG
 import SwiftSyntaxMacrosGenericTestSupport
 import Testing
 
@@ -357,3 +360,4 @@ import Testing
         )
     }
 }
+#endif

@@ -1,10 +1,10 @@
 import Lexic
-public import SwiftSyntax
-public import SwiftSyntaxMacros
+import SwiftSyntax
+import SwiftSyntaxMacros
 
-@_spi(testable) public struct ConfiguratorMacro {}
+struct ConfiguratorMacro {}
 extension ConfiguratorMacro: PeerMacro {
-    public static func expansion(
+    static func expansion(
         of attribute: AttributeSyntax,
         providingPeersOf decl: some DeclSyntaxProtocol,
         in context: some MacroExpansionContext

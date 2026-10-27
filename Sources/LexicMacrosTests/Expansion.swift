@@ -1,4 +1,7 @@
-@_spi(testable) import LexicMacros
+//  ‘@testable import’ of the macro plugin needs ‘-enable-testing’, so these tests exist in
+//  debug builds only; ‘Scripts/TestAll’ runs them from its debug build.
+#if DEBUG
+@testable import LexicMacros
 import SwiftSyntaxMacroExpansion
 import SwiftSyntaxMacrosGenericTestSupport
 import Testing
@@ -49,3 +52,4 @@ extension Expansion {
         )
     }
 }
+#endif

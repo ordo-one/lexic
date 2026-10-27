@@ -10,6 +10,11 @@ swift build \
     --build-tests \
     -Xswiftc -enable-library-evolution
 
+# the macro expansion tests import the plugin with ‘@testable’, which only a debug build allows
+swift test \
+    --skip-build \
+    --filter LexicMacrosTests
+
 swift build -c release \
     --build-tests
 
