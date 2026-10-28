@@ -14,6 +14,13 @@ extension ConfiguratorMacro: PeerMacro {
             return []
         }
 
+        if  case true? = context.lexicalContext.first?.is(ProtocolDeclSyntax.self) {
+            context[.error, attribute] = """
+            ‘@Configurator’ cannot be applied to a protocol requirement
+            """
+            return []
+        }
+
         let parameters: FunctionParameterListSyntax = decl.signature.parameterClause.parameters
 
         guard let closure: FunctionParameterSyntax = parameters.last else {
@@ -82,6 +89,20 @@ extension ConfiguratorMacro: PeerMacro {
             let clause: GenericParameterClauseSyntax = generics {
             let symbol: String = .init(error.name.unescaped)
 
+            if  let inherited: TypeSyntax = error.inheritedType {
+                switch "\(inherited.trimmed)" {
+                case "Error", "Swift.Error":
+                    break
+
+                default:
+                    context[.error, inherited] = """
+                    error type ‘\(symbol)’ of configuration closure is constrained to \
+                    ‘\(inherited.trimmed)’, which ‘Never’ is not known to conform to, and \
+                    cannot be removed from the generated initializer
+                    """
+                    return []
+                }
+            }
             for parameter: FunctionParameterSyntax in preceding
                 where parameter.type.contains(symbol: symbol) {
                 context[.error, parameter.type] = """
@@ -134,7 +155,8 @@ extension ConfiguratorMacro: PeerMacro {
         //  Determine the effects of the peer initializer.
         let effects: FunctionEffectSpecifiersSyntax? = decl.signature.effectSpecifiers
         let otherThrowingClosures: Bool = preceding.contains {
-            $0.type.function?.effectSpecifiers?.throwsClause != nil
+            let type: TypeSyntax = $0.type.wrapped ?? $0.type
+            return type.function?.effectSpecifiers?.throwsClause != nil
         }
 
         let throwsClause: ThrowsClauseSyntax?
@@ -172,15 +194,20 @@ extension ConfiguratorMacro: PeerMacro {
         let async: Bool = effects?.asyncSpecifier != nil
 
         //  Assemble the declaration.
-        var modifiers: [String] = decl.modifiers.map { "\($0.trimmed)" }
+        var modifiers: [String] = decl.modifiers.filter {
+            $0.name.tokenKind != .keyword(.override)
+        }.map { "\($0.trimmed)" }
 
         if  case true? = context.lexicalContext.first?.is(ClassDeclSyntax.self),
            !modifiers.contains("convenience") {
             modifiers.append("convenience")
         }
 
-        let attributes: [String] = decl.attributes.mirroredAsMemberForMember.map {
+        var attributes: [String] = decl.attributes.mirroredAsMemberForMember.map {
             "\($0.trimmed)"
+        }
+        if  let isolation: AttributeSyntax = decl.attributes.first(named: "MainActor") {
+            attributes.append("\(isolation.trimmed)")
         }
 
         var prefix: String = attributes.joined(separator: " ")

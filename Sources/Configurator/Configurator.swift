@@ -28,15 +28,17 @@
 /// ```
 ///
 /// The peer preserves the preceding parameters, access control, failability, `async`, and
-/// mirrored attributes such as `@available`, `@inlinable`, and `@_spi`. If the closure’s error type is
-/// a generic parameter of the initializer that is not referenced anywhere else in the
-/// signature, it is removed from the peer. If the initializer uses `rethrows` and has no
-/// other throwing closure parameters, the peer does not throw. Otherwise the peer keeps the
+/// mirrored attributes such as `@available`, `@inlinable`, `@_spi`, and `@MainActor`. If the
+/// closure’s error type is a generic parameter of the initializer that is not referenced
+/// anywhere else in the signature, and that is constrained to nothing but `Error`, it is
+/// removed from the peer. If the initializer uses `rethrows` and has no other throwing
+/// closure parameters, optional or not, the peer does not throw. Otherwise the peer keeps the
 /// original throws clause and delegates with `try`.
 ///
 /// > Note: The `convenience` modifier is inserted automatically when the initializer is
 /// declared directly inside a class. Inside an extension of a class, write `convenience`
-/// on the original initializer and it will be mirrored.
+/// on the original initializer and it will be mirrored. The `override` modifier is never
+/// copied, and the macro cannot be applied to a protocol requirement.
 @attached(
     peer,
     names: overloaded

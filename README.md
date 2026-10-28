@@ -280,9 +280,9 @@ init(name: String) {
 let account: Account = .init(name: "x")
 ```
 
-The peer preserves the preceding parameters with their labels, attributes, and default arguments, along with the access control, failability, and `async` of the original initializer. Attributes such as `@available`, `@inlinable`, and `@_spi` are mirrored. If the closure’s error type is a generic parameter of the initializer that nothing else in the signature refers to, it is removed from the peer; if the initializer uses `rethrows` and has no other throwing closure parameters, the peer does not throw. Otherwise, the peer keeps the original throws clause and delegates with `try`.
+The peer preserves the preceding parameters with their labels, attributes, and default arguments, along with the access control, failability, and `async` of the original initializer. Attributes such as `@available`, `@inlinable`, and `@_spi` are mirrored, as is `@MainActor`, so that the peer shares the isolation of the original; custom global actors are not recognized. If the closure’s error type is a generic parameter of the initializer that nothing else in the signature refers to, and that is constrained to nothing but `Error`, it is removed from the peer; if the initializer uses `rethrows` and has no other throwing closure parameters, optional or not, the peer does not throw. Otherwise, the peer keeps the original throws clause and delegates with `try`.
 
-When the initializer is declared directly inside a class, the macro inserts the `convenience` modifier automatically. Inside an extension of a class, write `convenience` on the original initializer and it will be mirrored.
+When the initializer is declared directly inside a class, the macro inserts the `convenience` modifier automatically. Inside an extension of a class, write `convenience` on the original initializer and it will be mirrored. The `override` modifier is never copied: when the superclass uses `@Configurator` too, the peer coincides with a convenience initializer of the superclass, which Swift does not allow to be overridden explicitly. The macro cannot be applied to a protocol requirement.
 
 
 ## Polymorphic projection with @Projection
