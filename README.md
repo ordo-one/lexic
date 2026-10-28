@@ -139,6 +139,7 @@ It will also copy the following attributes, if present:
 1. `@inlinable`
 1. `@inline`
 1. `@usableFromInline`
+1. `@_spi`
 
 
 ## Discriminated unions

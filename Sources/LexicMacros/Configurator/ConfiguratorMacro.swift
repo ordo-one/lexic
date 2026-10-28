@@ -54,7 +54,7 @@ extension ConfiguratorMacro: PeerMacro {
             }
         }
 
-        let preceding: [FunctionParameterSyntax] = parameters.dropLast()
+        let preceding: Slice<FunctionParameterListSyntax> = parameters.dropLast()
 
         for parameter: FunctionParameterSyntax in preceding {
             if  case .wildcard = (parameter.secondName ?? parameter.firstName).tokenKind {
@@ -179,7 +179,7 @@ extension ConfiguratorMacro: PeerMacro {
             modifiers.append("convenience")
         }
 
-        let attributes: [String] = decl.attributes.mirroredAsMemberForOverload.map {
+        let attributes: [String] = decl.attributes.mirroredAsMemberForMember.map {
             "\($0.trimmed)"
         }
 

@@ -85,17 +85,6 @@ let package: Package = .init(
                 .target(name: "Lexic"),
             ]
         ),
-        .testTarget(
-            name: "LexicMacrosTests",
-            dependencies: [
-                .target(name: "LexicMacros"),
-                .product(name: "SwiftSyntaxMacroExpansion", package: "swift-syntax"),
-                .product(
-                    name: "SwiftSyntaxMacrosGenericTestSupport",
-                    package: "swift-syntax"
-                ),
-            ]
-        ),
         .target(
             name: "Configurator",
             dependencies: [

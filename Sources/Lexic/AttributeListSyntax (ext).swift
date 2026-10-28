@@ -26,6 +26,8 @@ extension AttributeListSyntax {
                 return false
             }
             switch attribute.baseName {
+            case "_spi":
+                return true
             case "available":
                 return true
             case "frozen":
@@ -44,34 +46,9 @@ extension AttributeListSyntax {
                 return false
             }
             switch attribute.baseName {
-            case "available":
-                return true
-            default:
-                return false
-            }
-        }
-    }
-
-    /// The attributes an overload synthesized next to a member mirrors from it: those of
-    /// ``mirroredAsMemberForMember``, and `@_spi`, since an overload of an SPI member must not
-    /// widen the public API.
-    public var mirroredAsMemberForOverload: AttributeListSyntax {
-        self.filter {
-            guard case .attribute(let attribute) = $0 else {
-                return false
-            }
-            switch attribute.baseName {
             case "_spi":
                 return true
             case "available":
-                return true
-            case "backDeployed":
-                return true
-            case "inlinable":
-                return true
-            case "inline":
-                return true
-            case "usableFromInline":
                 return true
             default:
                 return false
@@ -85,6 +62,8 @@ extension AttributeListSyntax {
                 return false
             }
             switch attribute.baseName {
+            case "_spi":
+                return true
             case "available":
                 return true
             case "backDeployed":
