@@ -9,6 +9,7 @@ let package: Package = .init(
     products: [
         .library(name: "Assert", targets: ["Assert"]),
         .library(name: "Bijection", targets: ["Bijection"]),
+        .library(name: "Configurator", targets: ["Configurator"]),
         .library(name: "FileContent", targets: ["FileContent"]),
         .library(name: "Lexic", targets: ["Lexic"]),
         .library(name: "Discriminated", targets: ["Discriminated"]),
@@ -83,6 +84,18 @@ let package: Package = .init(
             dependencies: [
                 .target(name: "Lexic"),
             ]
+        ),
+        .target(
+            name: "Configurator",
+            dependencies: [
+                .target(name: "LexicMacros"),
+            ],
+        ),
+        .testTarget(
+            name: "ConfiguratorTests",
+            dependencies: [
+                .target(name: "Configurator"),
+            ],
         ),
         .target(
             name: "Discriminated",
