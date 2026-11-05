@@ -4,6 +4,7 @@ import SwiftSyntaxMacros
     let providingMacros: [any Macro.Type] = [
         AmbientMacro.self,
         BijectionMacro.self,
+        ConfiguratorMacro.self,
         DiscriminatedMacro.self,
         DiscriminantMacro.self,
         ProjectionMacro.self,
