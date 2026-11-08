@@ -139,6 +139,7 @@ It will also copy the following attributes, if present:
 1. `@inlinable`
 1. `@inline`
 1. `@usableFromInline`
+1. `@_spi`
 
 
 ## Discriminated unions
@@ -248,6 +249,40 @@ static var recurring: Self {
 ```
 
 Parameters that define default arguments use those defaults in the synthesized constructor, while optional parameters without defaults receive `nil`. Cases without associated values (such as `.quick`) already support zero-argument dot syntax natively in Swift and are skipped. Any case containing non-optional parameters lacking default arguments—such as `.custom(deadline:)`—is also skipped.
+
+
+## Configuration closures with @Configurator
+
+Initializers often accept a trailing closure that lets the caller adjust the value under construction. When that closure can throw, it cannot simply be defaulted to `{ _ in }`: the default is upcast to a throwing closure, and every call site must be written with `try`, even when no closure is passed.
+
+The `@Configurator` macro synthesizes a peer initializer without the closure, which delegates to the original with an explicitly non-throwing closure. The closure’s error type resolves to `Never`, so the generated overload does not throw:
+
+```swift
+struct Account {
+    var name: String
+    var limit: Int = 0
+
+    @Configurator init<E>(
+        name: String,
+        body: (inout Self) throws(E) -> ()
+    ) throws(E) {
+        self.name = name
+        try body(&self)
+    }
+}
+
+/* --- EXPANDS TO --- */
+// Synthesized next to the original initializer:
+init(name: String) {
+    self.init(name: name, body: { (_: inout Self) throws(Never) -> () in })
+}
+
+let account: Account = .init(name: "x")
+```
+
+The peer preserves the preceding parameters with their labels, attributes, and default arguments, along with the access control, failability, and `async` of the original initializer. Attributes such as `@available`, `@inlinable`, and `@_spi` are mirrored, as is `@MainActor`, so that the peer shares the isolation of the original; custom global actors are not recognized. If the closure’s error type is a generic parameter of the initializer that nothing else in the signature refers to, and that is constrained to nothing but `Error`, it is removed from the peer; if the initializer uses `rethrows` and has no other throwing closure parameters, optional or not, the peer does not throw. Otherwise, the peer keeps the original throws clause and delegates with `try`.
+
+When the initializer is declared directly inside a class, the macro inserts the `convenience` modifier automatically. Inside an extension of a class, write `convenience` on the original initializer and it will be mirrored. The `override` modifier is never copied: when the superclass uses `@Configurator` too, the peer coincides with a convenience initializer of the superclass, which Swift does not allow to be overridden explicitly. The macro cannot be applied to a protocol requirement.
 
 
 ## Polymorphic projection with @Projection

@@ -26,6 +26,8 @@ extension AttributeListSyntax {
                 return false
             }
             switch attribute.baseName {
+            case "_spi":
+                return true
             case "available":
                 return true
             case "frozen":
@@ -44,6 +46,8 @@ extension AttributeListSyntax {
                 return false
             }
             switch attribute.baseName {
+            case "_spi":
+                return true
             case "available":
                 return true
             default:
@@ -58,6 +62,8 @@ extension AttributeListSyntax {
                 return false
             }
             switch attribute.baseName {
+            case "_spi":
+                return true
             case "available":
                 return true
             case "backDeployed":
