@@ -28,10 +28,10 @@
 /// ```
 ///
 /// The peer preserves the preceding parameters, access control, failability, `async`, and
-/// mirrored attributes such as `@available`, `@inlinable`, `@_spi`, and `@MainActor`. If the
-/// closure’s error type is a generic parameter of the initializer that is not referenced
-/// anywhere else in the signature, and that is constrained to nothing but `Error`, it is
-/// removed from the peer. If the initializer uses `rethrows` and has no other throwing
+/// mirrored attributes such as `@available`, `@inlinable`, and `@_spi`. Actor isolation is not
+/// mirrored, and an initializer marked `@MainActor` is refused. If the closure’s error type
+/// is a generic parameter of the initializer that is not referenced anywhere else in the
+/// signature, and that carries no constraint of its own, it is removed from the peer. If the initializer uses `rethrows` and has no other throwing
 /// closure parameters, optional or not, the peer does not throw. Otherwise the peer keeps the
 /// original throws clause and delegates with `try`.
 ///

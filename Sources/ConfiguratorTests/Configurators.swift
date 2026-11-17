@@ -72,11 +72,6 @@ import Testing
         #expect(subclass.y == 24)
     }
 
-    @Test @MainActor static func IsolatedInitializer() {
-        let isolated: Isolated = .init(x: 13)
-        #expect(isolated.x == 13)
-    }
-
     @Test static func OptionalThrowingClosure() {
         let absent: OptionalClosure = .init(x: 14, first: nil)
         #expect(absent.x == 14)
@@ -84,10 +79,5 @@ import Testing
 
         let present: OptionalClosure = .init(x: 14, first: { 15 })
         #expect(present.y == 15)
-    }
-
-    @Test static func ConstrainedError() {
-        let constrained: Constrained = .init(x: 16)
-        #expect(constrained.x == 16)
     }
 }

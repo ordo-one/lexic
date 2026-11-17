@@ -21,6 +21,18 @@ extension ConfiguratorMacro: PeerMacro {
             return []
         }
 
+        //  The generated initializer would be nonisolated, and could not delegate to an
+        //  isolated one. Only the standard global actor can be recognized by name, and only to
+        //  refuse it; isolation attributes are never mirrored, as they cannot be told apart
+        //  from other attributes by syntax.
+        if  let isolation: AttributeSyntax = decl.attributes.first(named: "MainActor") {
+            context[.error, isolation] = """
+            ‘@Configurator’ does not mirror actor isolation onto the generated initializer; \
+            isolate the enclosing type instead, or write the overload by hand
+            """
+            return []
+        }
+
         let parameters: FunctionParameterListSyntax = decl.signature.parameterClause.parameters
 
         guard let closure: FunctionParameterSyntax = parameters.last else {
@@ -38,9 +50,13 @@ extension ConfiguratorMacro: PeerMacro {
         }
 
         guard function.returnClause.type.isVoid else {
-            context[.error, function.returnClause.type] = """
-            configuration closure must return ‘Void’
-            """
+            if  let diagnostic: String = function.returnClause.type.isUnsugaredVoidDiagnostic {
+                context[.error, function.returnClause.type] = diagnostic
+            } else {
+                context[.error, function.returnClause.type] = """
+                configuration closure must return ‘()’
+                """
+            }
             return []
         }
 
@@ -90,18 +106,19 @@ extension ConfiguratorMacro: PeerMacro {
             let symbol: String = .init(error.name.unescaped)
 
             if  let inherited: TypeSyntax = error.inheritedType {
-                switch "\(inherited.trimmed)" {
-                case "Error", "Swift.Error":
-                    break
-
-                default:
+                if  inherited.isSuspectedError {
+                    context[.error, inherited] = """
+                    constraint ‘\(symbol): \(inherited.trimmed)’ is inferred from \
+                    ‘throws(\(symbol))’ and cannot be verified by ‘@Configurator’; remove it
+                    """
+                } else {
                     context[.error, inherited] = """
                     error type ‘\(symbol)’ of configuration closure is constrained to \
                     ‘\(inherited.trimmed)’, which ‘Never’ is not known to conform to, and \
                     cannot be removed from the generated initializer
                     """
-                    return []
                 }
+                return []
             }
             for parameter: FunctionParameterSyntax in preceding
                 where parameter.type.contains(symbol: symbol) {
@@ -203,11 +220,8 @@ extension ConfiguratorMacro: PeerMacro {
             modifiers.append("convenience")
         }
 
-        var attributes: [String] = decl.attributes.mirroredAsMemberForMember.map {
+        let attributes: [String] = decl.attributes.mirroredAsMemberForMember.map {
             "\($0.trimmed)"
-        }
-        if  let isolation: AttributeSyntax = decl.attributes.first(named: "MainActor") {
-            attributes.append("\(isolation.trimmed)")
         }
 
         var prefix: String = attributes.joined(separator: " ")

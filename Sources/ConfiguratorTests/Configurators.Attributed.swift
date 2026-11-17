@@ -6,7 +6,7 @@ extension Configurators {
 
         @Configurator init<E>(
             x: Int,
-            body: @Sendable (inout Self, Int) throws(E) -> Void
+            body: @Sendable (inout Self, Int) throws(E) -> ()
         ) throws(E) {
             self.x = x
             try body(&self, x)

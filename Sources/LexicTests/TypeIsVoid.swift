@@ -9,15 +9,19 @@ import Testing
     }
     @Test static func Named() {
         let type: TypeSyntax = "Void"
-        #expect(type.isVoid)
+        #expect(type.isVoid == false)
     }
     @Test static func Qualified() {
         let type: TypeSyntax = "Swift.Void"
-        #expect(type.isVoid)
+        #expect(type.isVoid == false)
     }
     @Test static func Parenthesized() {
-        let type: TypeSyntax = "(Void)"
+        let type: TypeSyntax = "(())"
         #expect(type.isVoid)
+    }
+    @Test static func ParenthesizedNamed() {
+        let type: TypeSyntax = "(Void)"
+        #expect(type.isVoid == false)
     }
     @Test static func Nominal() {
         let type: TypeSyntax = "Int"

@@ -53,7 +53,8 @@ struct ThrowsTyped {
 
 The solution we propose is to have an attached peer macro (`@attached(peer, names: overloaded)`)
 named `@Configurator`, which can be applied to any initializer declaration whose final argument
-is a throwing closure returning `Void` (`()`).
+is a throwing closure returning the empty tuple `()`. The spelling `Void` is not recognized, as
+it could refer to a shadowing type.
 
 ```swift
 @Configurator public init<E>(
@@ -101,17 +102,17 @@ diagnostic.
 
 The peer declaration also preserves the access control modifier, failability (`init?` or
 `init!`), and applicable attributes (such as `@inlinable` and `@available`, excluding
-`@Configurator` itself) from the original initializer. The `@MainActor` attribute is mirrored
-as well, since a nonisolated peer could not call a main actor-isolated initializer
-synchronously; custom global actor attributes cannot be told apart from other attributes by
-syntax alone and are not mirrored. Because delegating to `self.init` within a class requires a
-convenience initializer, the macro inspects `context.lexicalContext` and inserts the
-`convenience` modifier when the enclosing type is a `ClassDeclSyntax` (if not already
-present). The `override` modifier is dropped from the peer: when the superclass uses `@Configurator`
-too, the peer coincides with the convenience initializer synthesized there, and Swift forbids
-`override` on an initializer that matches a convenience initializer of the superclass. A
-superclass that independently declares the shorter initializer as a designated one cannot be
-told apart by syntax, and is not supported.
+`@Configurator` itself) from the original initializer. Actor isolation is not mirrored: a
+global actor attribute cannot be told apart from any other attribute by syntax alone, and the
+name `MainActor` could be shadowed, so the macro recognizes `@MainActor` only in order to
+refuse the initializer, since a nonisolated peer could not delegate to an isolated one.
+Because delegating to `self.init` within a class requires a convenience initializer, the macro
+inspects `context.lexicalContext` and inserts the `convenience` modifier when the enclosing
+type is a `ClassDeclSyntax` (if not already present). The `override` modifier is dropped from
+the peer: when the superclass uses `@Configurator` too, the peer coincides with the convenience
+initializer synthesized there, and Swift forbids `override` on an initializer that matches a
+convenience initializer of the superclass. A superclass that independently declares the
+shorter initializer as a designated one cannot be told apart by syntax, and is not supported.
 
 
 ## Generics and effects propagation
@@ -122,8 +123,9 @@ To handle generic error parameters without performing surgery on generic `where`
 `E` declared as a generic parameter on the initializer, the macro uses these helpers to check
 whether `E` is referenced in any preceding parameter types, inherited generic constraints, or
 `where` clause requirements. Since the empty closure substitutes `Never` for `E`, the macro
-also requires that `E` itself is constrained to nothing but `Error`. If `E` appears only as the
-thrown error type, the macro drops `E`
+also requires that `E` itself carry no inherited constraint; the compiler infers `E: Error`
+from `throws(E)`, and a constraint spelled out as `Error` cannot be verified to refer to
+`Swift.Error`. If `E` appears only as the thrown error type, the macro drops `E`
 from the peer initializer’s generic parameter list (removing the generic parameter clause
 entirely if `E` was the only generic parameter) while leaving any remaining generic parameters
 and the `where` clause untouched. If `E` is constrained in the `where` clause or referenced by
@@ -147,10 +149,12 @@ following situations:
 
 -   The macro is attached to a declaration other than an initializer (`InitializerDeclSyntax`).
 -   The initializer has no parameters, or its final parameter is not a closure type.
--   The final closure parameter has a non-`Void` return type.
+-   The final closure parameter has a return type other than `()`, including the spelling
+    `Void`, which the macro cannot distinguish from a shadowing type.
 -   The final parameter type is a non-throwing closure, in which case the diagnostic should
     instruct the user to provide a default argument (`= { _ in }`) instead.
 -   The closure’s generic error parameter is referenced in another parameter, constrained in
-    a `where` clause, or constrained to anything other than `Error`.
+    a `where` clause, or carries an inherited constraint of its own.
 -   Any preceding parameter is variadic.
 -   The initializer is a protocol requirement.
+-   The initializer is marked `@MainActor`.

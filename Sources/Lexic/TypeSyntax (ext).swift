@@ -164,27 +164,57 @@ extension TypeSyntax {
         return nil
     }
 
-    /// Indicates if this type is spelled as `()`, `Void`, or `Swift.Void`, looking through
-    /// redundant parentheses.
+    /// Indicates if this type is spelled as the empty tuple `()`, looking through redundant
+    /// parentheses. The spellings `Void` and `Swift.Void` are deliberately not recognized, as
+    /// they can be shadowed; see ``isUnsugaredVoid``.
     public var isVoid: Bool {
-        if  let tuple: TupleTypeSyntax = self.as(TupleTypeSyntax.self) {
-            if  tuple.elements.isEmpty {
-                return true
-            }
-            if  tuple.elements.count == 1,
-                let first: TupleTypeElementSyntax = tuple.elements.first,
-                    first.firstName == nil {
-                return first.type.isVoid
-            }
+        guard
+        let tuple: TupleTypeSyntax = self.as(TupleTypeSyntax.self) else {
             return false
         }
+        if  tuple.elements.isEmpty {
+            return true
+        }
+        if  tuple.elements.count == 1,
+            let first: TupleTypeElementSyntax = tuple.elements.first,
+                first.firstName == nil {
+            return first.type.isVoid
+        }
+        return false
+    }
+
+    public var isUnsugaredVoidDiagnostic: String? {
+        guard self.isUnsugaredVoid else {
+            return nil
+        }
+        return """
+        spelling ‘\(self.trimmed)’ is not recognized, as it could refer to a type other than \
+        the empty tuple; spell it ‘()’ instead
+        """
+    }
+
+    /// Indicates if this type is spelled as `Void` or `Swift.Void`, looking through attributes
+    /// and redundant parentheses. This is only useful for emitting diagnostics, as either
+    /// spelling could refer to a shadowing type.
+    public var isUnsugaredVoid: Bool {
+        self.isSuspected(standard: "Void")
+    }
+
+    /// Indicates if this type is spelled as `Error` or `Swift.Error`, looking through
+    /// attributes and redundant parentheses. This is only useful for emitting diagnostics, as
+    /// either spelling could refer to a shadowing type.
+    public var isSuspectedError: Bool {
+        self.isSuspected(standard: "Error")
+    }
+
+    private func isSuspected(standard name: String) -> Bool {
         if  let identifier: IdentifierTypeSyntax = self.as(IdentifierTypeSyntax.self) {
-            return identifier.name.unescaped == "Void"
+            return identifier.name.unescaped == name
                 && identifier.genericArgumentClause == nil
         }
         if  let member: MemberTypeSyntax = self.as(MemberTypeSyntax.self) {
             guard
-            member.name.unescaped == "Void",
+            member.name.unescaped == name,
             member.genericArgumentClause == nil,
             let base: IdentifierTypeSyntax = member.baseType.as(
                 IdentifierTypeSyntax.self
@@ -192,6 +222,15 @@ extension TypeSyntax {
                 return false
             }
             return base.name.unescaped == "Swift"
+        }
+        if  let attributed: AttributedTypeSyntax = self.as(AttributedTypeSyntax.self) {
+            return attributed.baseType.isSuspected(standard: name)
+        }
+        if  let tuple: TupleTypeSyntax = self.as(TupleTypeSyntax.self),
+                tuple.elements.count == 1,
+            let first: TupleTypeElementSyntax = tuple.elements.first,
+                first.firstName == nil {
+            return first.type.isSuspected(standard: name)
         }
         return false
     }
